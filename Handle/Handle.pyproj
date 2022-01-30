@@ -33,6 +33,7 @@
     <Compile Include="Corrupt.py" />
     <Compile Include="Crop.py" />
     <Compile Include="GetData.py" />
+    <Compile Include="NN.py" />
     <Compile Include="Test.py" />
     <Compile Include="Train.py" />
   </ItemGroup>
