@@ -13,8 +13,8 @@ NeuralNetwork::NeuralNetwork(py::tuple& shape) {
 	this->weighted_sums = new VectorXd[layers - 1];
 	this->biases = new VectorXd[layers - 1];
 	this->deltas = new VectorXd[layers - 1];
-	this->actfuncs = new (VectorXd(*[layers - 1])(VectorXd&));
-	this->actfunc_ders = new (VectorXd(*[layers - 1])(VectorXd&));
+	this->actfuncs = new (const VectorXd(*[layers - 1])(const VectorXd&));
+	this->actfunc_ders = new (const VectorXd(*[layers - 1])(const VectorXd&));
 
 	for (unsigned l = 0; l < layers; l++) {
 		this->shape[l] = py::int_(shape[l]);
@@ -54,21 +54,21 @@ void NeuralNetwork::inspect() const {
 }
 
 
-const VectorXd& NeuralNetwork::forwardprop(VectorXd& X) {
+const VectorXd& NeuralNetwork::forwardprop(const VectorXd& X) {
 	// activations[0](0, X.size()) = X(0, shape[0]);
 	assert(X.size() == activations[0].size());
 
 	activations[0] = X;
 	for (unsigned l = 0; l < layers - 1; l++) {
+		// Eigen matrix multiplication requires optimization
 		weighted_sums[l] = weights[l] * activations[l] + biases[l];
 		activations[l + 1] = actfuncs[l](weighted_sums[l]);
 	}
-
 	return activations[layers - 1];
 }
 
 
-void NeuralNetwork::backprop(VectorXd& Y, double lr) {
+void NeuralNetwork::backprop(const VectorXd& Y, const double lr) {
 	deltas[layers - 2] = (Y - activations[layers - 1]).cwiseProduct(actfunc_ders[layers - 2](weighted_sums[layers - 2]));
 	for (size_t l = layers - 2; l > 0; l--) {
 		deltas[l - 1] = (weights[l].transpose() * deltas[l]).cwiseProduct(actfunc_ders[l - 1](weighted_sums[l - 1]));
@@ -82,15 +82,24 @@ void NeuralNetwork::backprop(VectorXd& Y, double lr) {
 }
 
 
-void NeuralNetwork::train(MatrixXd& input, MatrixXd& target, double lr, unsigned epochs) {
+void NeuralNetwork::train(const MatrixXd& input, const MatrixXd& target, const double lr, const unsigned epochs, const unsigned test_freq) {
+	float accuracy = 0, average_accuracy = 0, best_accuracy = 0;
 	std::random_device rd;
 	std::mt19937 rng(rd());
 	std::uniform_int_distribution<unsigned> uni(0, input.rows() - 1);
 
+	unsigned tests = 0;
 	for (unsigned epoch = 0; epoch < epochs; epoch++) {
-		if (!(epoch % 1000)) {
-			std::cout << "\rEpoch " << epoch << " | ";
-			test(input, target);
+		if (!(epoch % test_freq)) {
+			accuracy = test(input, target);
+			average_accuracy = (average_accuracy * tests + accuracy) / (tests + 1);
+			average_accuracy = std::round(average_accuracy * 100) / 100;
+			(accuracy > best_accuracy) && (best_accuracy = accuracy);
+			std::cout << "\rEpoch " << epoch << " | "
+			<< "Accuracy: " << accuracy << "% | "
+			<< "Average accuracy: " << average_accuracy << "% | "
+			<< "Best accuracy: " << best_accuracy << "%\t";
+			tests++;
 		}
 		unsigned i = uni(rng);
 		VectorXd X = input.row(i);
@@ -101,19 +110,22 @@ void NeuralNetwork::train(MatrixXd& input, MatrixXd& target, double lr, unsigned
 }
 
 
-void NeuralNetwork::test(MatrixXd& input, MatrixXd& target) {
-	unsigned correct_predictions = 0;
+const float NeuralNetwork::test(const MatrixXd& input, const MatrixXd& target) {
+	float correct_predictions = 0;
+	float accuracy;
 	VectorXd network_output;
 	VectorXd::Index real_max_index, expected_max_index;
 
 	for (unsigned i = 0; i < input.rows(); i++) {
-		network_output = forwardprop((VectorXd&)(VectorXd)(input.row(i)));
+		network_output = forwardprop(input.row(i));
 		network_output.maxCoeff(&real_max_index);
 		((VectorXd)(target.row(i))).maxCoeff(&expected_max_index);
 		(real_max_index == expected_max_index) && correct_predictions++;
 	}
 
-	std::cout << "Accuracy: " << correct_predictions / input.rows() * 100 << "%\0";
+	accuracy = correct_predictions / input.rows() * 100;
+	accuracy = std::round(accuracy * 100) / 100;
+	return accuracy;
 }
 
 
@@ -129,7 +141,7 @@ NeuralNetwork::~NeuralNetwork() {
 }
 
 
-static VectorXd sigmoid(VectorXd& X) {
+static const VectorXd sigmoid(const VectorXd& X) {
 	VectorXd result(X.size());
 	for (unsigned i = 0; i < result.size(); i++)
 		result(i) = 1 / (1 + exp(-X(i)));
@@ -137,7 +149,7 @@ static VectorXd sigmoid(VectorXd& X) {
 }
 
 
-static VectorXd sigmoid_der(VectorXd& X) {
+static const VectorXd sigmoid_der(const VectorXd& X) {
 	VectorXd result(X.size());
 	result = sigmoid(X).cwiseProduct((-sigmoid(X).array() + 1).matrix());
 	return result;

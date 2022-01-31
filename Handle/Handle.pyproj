@@ -30,6 +30,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Check.py" />
     <Compile Include="Corrupt.py" />
     <Compile Include="Crop.py" />
     <Compile Include="GetData.py" />

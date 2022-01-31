@@ -15,18 +15,18 @@ private:
 	VectorXd* weighted_sums;
 	VectorXd* biases;
 	VectorXd* deltas;
-	VectorXd(**actfuncs)(VectorXd&);
-	VectorXd(**actfunc_ders)(VectorXd&);
-	void backprop(VectorXd& Y, double lr);
+	const VectorXd(**actfuncs)(const VectorXd&);
+	const VectorXd(**actfunc_ders)(const VectorXd&);
+	void backprop(const VectorXd& Y, const double lr);
 
 public:
 	NeuralNetwork(py::tuple& shape);
 	void inspect() const;
-	const VectorXd& forwardprop(VectorXd& X);
-	void train(MatrixXd& input, MatrixXd& target, double lr, unsigned epochs);
-	void test(MatrixXd& X, MatrixXd& Y);
+	const VectorXd& forwardprop(const VectorXd& X);
+	void train(const MatrixXd& input, const MatrixXd& target, const double lr, const unsigned epochs, const unsigned test_freq);
+	const float test(const MatrixXd& X, const MatrixXd& Y);
 	~NeuralNetwork();
 };
 
-static VectorXd sigmoid(VectorXd& X);
-static VectorXd sigmoid_der(VectorXd& X);
+static const VectorXd sigmoid(const VectorXd& X);
+static const VectorXd sigmoid_der(const VectorXd& X);
