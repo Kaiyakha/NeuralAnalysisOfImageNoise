@@ -74,10 +74,9 @@ void NeuralNetwork::backprop(const VectorXd& Y, const double lr) {
 		deltas[l - 1] = (weights[l].transpose() * deltas[l]).cwiseProduct(actfunc_ders[l - 1](weighted_sums[l - 1]));
 	}
 	for (unsigned l = 0; l < layers - 1; l++) {
-		for (unsigned j = 0; j < shape[l + 1]; j++) {
+		for (unsigned j = 0; j < shape[l + 1]; j++)
 			weights[l].row(j) += lr * activations[l] * deltas[l](j);
-			biases[l] += deltas[l];
-		}
+		biases[l] += deltas[l];
 	}
 }
 

@@ -1,4 +1,3 @@
-
 # A script to train the network
 # Once the training is done, the configuration of the network
 # gets stored into a .pkl file so that it can be uploaded
@@ -25,7 +24,7 @@ except FileNotFoundError:
 cursor.hide()
 print("\nTraining...")
 train_time = time.time()
-nn.train(X[:-1000], Y[:-1000], 1e-20, int(1e6), 1000)
+nn.train(X[:-1000], Y[:-1000], 1e-4, int(1e7), int(1e3))
 train_time = round(time.time() - train_time)
 print("\nTesting...")
 nn.test(X[-1000:], Y[-1000:])
