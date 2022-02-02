@@ -4,6 +4,7 @@
 # to continue the training on the next run of the script
 
 import os, cursor, dill, time
+from configparser import ConfigParser
 from GetData import *
 from NeuralNetwork import *
 
@@ -12,19 +13,27 @@ PATH = os.path.dirname(__file__) + "/../Items"
 DATA_PATH = PATH + "/Patches/Noisy_Patches/"
 TRAIN_PATH = DATA_PATH + "R/"
 TARGET_PATH = DATA_PATH + "strip_ids_R.csv"
+CONFIG_FILE = "config.ini"
 
 X, Y = getData(TRAIN_PATH, TARGET_PATH)
 
+config = ConfigParser()
+config.read(CONFIG_FILE)
+config = {section: dict(config.items(section)) for section in config.sections()}
+
+'''
 try:
     with open(PATH + "/trained_nn.pkl", "rb") as pklfile:
         nn = dill.load(pklfile)
 except FileNotFoundError:
-    nn = NeuralNetwork((WIDTH * HEIGHT, WIDTH * 3, int(WIDTH * 1.8),  WIDTH))
+'''
+SHAPE = WIDTH * HEIGHT, WIDTH * 3, int(WIDTH * 1.8),  WIDTH
+nn = NeuralNetwork(SHAPE, config)
     
 cursor.hide()
 print("\nTraining...")
 train_time = time.time()
-nn.train(X[:-1000], Y[:-1000], 1e-4, int(1e7), int(1e3))
+nn.train(X[:-1000], Y[:-1000], 1e-3, int(1e7), int(1e3))
 train_time = round(time.time() - train_time)
 print("\nTesting...")
 nn.test(X[-1000:], Y[-1000:])

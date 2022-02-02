@@ -368,3 +368,4 @@ Items/*
 Handle/__pycache__/
 NN.py
 Check.py
+TestConfig.py

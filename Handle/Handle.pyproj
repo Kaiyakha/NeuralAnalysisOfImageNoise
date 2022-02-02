@@ -36,7 +36,11 @@
     <Compile Include="GetData.py" />
     <Compile Include="NN.py" />
     <Compile Include="Test.py" />
+    <Compile Include="TestConfig.py" />
     <Compile Include="Train.py" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="config.ini" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in
