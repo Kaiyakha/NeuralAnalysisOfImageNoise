@@ -3,43 +3,29 @@
 # gets stored into a .pkl file so that it can be uploaded
 # to continue the training on the next run of the script
 
-import os, cursor, dill, time
-from configparser import ConfigParser
-from GetData import *
+import os, cursor, time
+from HandleConfig import getConfig
+from GetData import getData
 from NeuralNetwork import *
 
-SIZE = WIDTH, HEIGHT = 28, 28
 PATH = os.path.dirname(__file__) + "/../Items"
 DATA_PATH = PATH + "/Patches/Noisy_Patches/"
 TRAIN_PATH = DATA_PATH + "R/"
 TARGET_PATH = DATA_PATH + "strip_ids_R.csv"
 CONFIG_FILE = "config.ini"
 
+config_init, config_train = getConfig(CONFIG_FILE)
 X, Y = getData(TRAIN_PATH, TARGET_PATH)
 
-config = ConfigParser()
-config.read(CONFIG_FILE)
-config = {section: dict(config.items(section)) for section in config.sections()}
-
-'''
-try:
-    with open(PATH + "/trained_nn.pkl", "rb") as pklfile:
-        nn = dill.load(pklfile)
-except FileNotFoundError:
-'''
-SHAPE = WIDTH * HEIGHT, WIDTH * 3, int(WIDTH * 1.8),  WIDTH
-nn = NeuralNetwork(SHAPE, config)
+network = NeuralNetwork(config_init)
     
 cursor.hide()
 print("\nTraining...")
 train_time = time.time()
-nn.train(X[:-1000], Y[:-1000], 1e-4, int(1e7), int(1e3))
+network.train(X[:-1000], Y[:-1000], config_train)
 train_time = round(time.time() - train_time)
 print("\nTesting...")
-nn.test(X[-1000:], Y[-1000:])
+network.test(X[-1000:], Y[-1000:])
 m, s = divmod(train_time, 60)
 h, m = divmod(m, 60)
 print(f"\nTime taken: {str(h).zfill(2)}:{str(m).zfill(2)}:{str(s).zfill(2)}")
-
-# with open(PATH + "/trained_nn.pkl", "wb") as pklfile:
-#     dill.dump(nn, pklfile, dill.HIGHEST_PROTOCOL)

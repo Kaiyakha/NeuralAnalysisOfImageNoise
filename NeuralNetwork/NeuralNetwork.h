@@ -23,10 +23,10 @@ private:
 	void backprop(const VectorXd& Y, const double lr);
 
 public:
-	NeuralNetwork(const py::tuple& shape, const py::dict& config);
+	NeuralNetwork(const py::dict& config);
 	void inspect() const;
 	VectorXd forwardprop(const VectorXd& X);
-	void train(const MatrixXd& input, const MatrixXd& target, const double lr, const unsigned epochs, const unsigned test_freq);
+	void train(const MatrixXd& input, const MatrixXd& target, const py::dict& config);
 	const float test(const MatrixXd& X, const MatrixXd& Y);
 	~NeuralNetwork();
 };

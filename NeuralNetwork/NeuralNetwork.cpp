@@ -3,7 +3,8 @@
 #include "NeuralNetwork.h"
 
 
-NeuralNetwork::NeuralNetwork(const py::tuple& shape, const py::dict& config) {
+NeuralNetwork::NeuralNetwork(const py::dict& config) {
+	const py::list shape = config["shape_modifiers"];
 	this->layers = py::len(shape);
 	this->shape = new unsigned[layers];
 	this->activations = new VectorXd[layers];
@@ -23,29 +24,26 @@ NeuralNetwork::NeuralNetwork(const py::tuple& shape, const py::dict& config) {
 	for (unsigned l = 0; l < layers - 1; l++) {
 		weights[l] = MatrixXd::Random(this->shape[l + 1], this->shape[l]);
 		biases[l] = VectorXd::Zero(this->shape[l + 1]);
-	}
+	}	
 
-	const py::dict function_names = config[py::cast("functions")];
+	const py::list function_names = config["activation_functions"];
 	if (py::len(function_names) != layers - 1)
 		throw std::runtime_error("Network depth does not correspond to the function list");
 	std::string function_name;
-	int i = 0;
-	for (auto item : function_names) {
-		function_name = py::str(item.second);
+	for (int i = 0; i < layers - 1; i++) {
+		function_name = py::str(function_names[i]);
 		actfuncs[i] = get_function_by_name(function_name);
 		actfunc_ders[i] = get_function_der_by_name(function_name);
-		(i < layers - 1) && i++;
+		if (!actfuncs[i] || !actfunc_ders[i]) throw std::runtime_error("Invalid function name has been passed");
 	}
 
-	const py::dict function_parameters = config[py::cast("parameters")];
+	const py::list function_parameters = config["activation_function_parameters"];
 	if (py::len(function_parameters) != layers - 1)
 		throw std::runtime_error("Network depth does not correspond to the parameter list");
 	double parameter;
-	i = 0;
-	for (auto item : function_parameters) {
-		parameter = py::float_(py::str(item.second));
+	for (int i = 0; i < layers - 1; i++) {
+		parameter = py::float_(function_parameters[i]);
 		func_params[i] = parameter;
-		(i < layers - 1) && i++;
 	}
 }
 
@@ -101,7 +99,7 @@ void NeuralNetwork::backprop(const VectorXd& Y, const double lr) {
 }
 
 
-void NeuralNetwork::train(const MatrixXd& input, const MatrixXd& target, const double lr, const unsigned epochs, const unsigned test_freq) {
+void NeuralNetwork::train(const MatrixXd& input, const MatrixXd& target, const py::dict& config) {
 	float accuracy = 0, best_accuracy = 0;
 	Index i;
 	VectorXd X, Y, rv;
@@ -109,6 +107,10 @@ void NeuralNetwork::train(const MatrixXd& input, const MatrixXd& target, const d
 	std::random_device rd;
 	std::mt19937 rng(rd());
 	std::uniform_int_distribution<Index> uni(0, input.rows() - 1);
+
+	const unsigned epochs = py::int_(py::float_(config["epochs"]));
+	const unsigned test_freq = py::int_(py::float_(config["test_frequency"]));
+	const double lr = py::float_(config["rate"]);
 
 	for (unsigned epoch = 0; epoch < epochs; epoch++) {
 		if (!(epoch % test_freq)) {
