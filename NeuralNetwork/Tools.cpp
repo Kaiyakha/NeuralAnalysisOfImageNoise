@@ -12,27 +12,27 @@ function_ get_function_der_by_name(const std::string& name) {
 	else return nullptr;
 }
 
-const VectorXd sigmoid(const VectorXd& X, double width) {
+const VectorXd sigmoid(const VectorXd& X, const double width) {
 	VectorXd result(X.size());
 	for (unsigned i = 0; i < result.size(); i++)
 		result(i) = 1 / (1 + exp(-X(i) * width));
 	return result;
 }
 
-const VectorXd sigmoid_der(const VectorXd& X, double width) {
+const VectorXd sigmoid_der(const VectorXd& X, const double width) {
 	VectorXd result(X.size());
 	result = sigmoid(X, width).cwiseProduct((-sigmoid(X, width).array() + 1).matrix());
 	return result;
 }
 
-const VectorXd ReLU(const VectorXd& X, double angle) {
+const VectorXd ReLU(const VectorXd& X, const double angle) {
 	VectorXd result(X.size());
 	for (unsigned i = 0; i < result.size(); i++)
 		result(i) = fmax(0, X(i) * angle);
 	return result;
 }
 
-const VectorXd ReLU_der(const VectorXd& X, double angle) {
+const VectorXd ReLU_der(const VectorXd& X, const double angle) {
 	VectorXd result(X.size());
 	for (unsigned i = 0; i < result.size(); i++)
 		result(i) = 0 ? X(i) < 0 : angle;

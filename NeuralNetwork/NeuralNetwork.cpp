@@ -72,7 +72,7 @@ void NeuralNetwork::inspect() const {
 }
 
 
-VectorXd NeuralNetwork::forwardprop(const VectorXd& X) {
+const VectorXd& NeuralNetwork::forwardprop(const VectorXd& X) {
 	// activations[0](0, X.size()) = X(0, shape[0]);
 	assert(X.size() == activations[0].size());
 

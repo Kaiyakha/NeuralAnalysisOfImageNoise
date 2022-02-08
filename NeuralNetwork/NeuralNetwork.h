@@ -25,16 +25,16 @@ private:
 public:
 	NeuralNetwork(const py::dict& config);
 	void inspect() const;
-	VectorXd forwardprop(const VectorXd& X);
+	const VectorXd& forwardprop(const VectorXd& X);
 	void train(const MatrixXd& input, const MatrixXd& target, const py::dict& config);
 	const float test(const MatrixXd& X, const MatrixXd& Y);
 	~NeuralNetwork();
 };
 
-const VectorXd sigmoid(const VectorXd& X, double width);
-const VectorXd sigmoid_der(const VectorXd& X, double width);
-const VectorXd ReLU(const VectorXd& X, double angle);
-const VectorXd ReLU_der(const VectorXd& X, double angle);
+const VectorXd sigmoid(const VectorXd& X, const double width);
+const VectorXd sigmoid_der(const VectorXd& X, const double width);
+const VectorXd ReLU(const VectorXd& X, const double angle);
+const VectorXd ReLU_der(const VectorXd& X, const double angle);
 
 function_ get_function_by_name(const std::string& name);
 function_ get_function_der_by_name(const std::string& name);
