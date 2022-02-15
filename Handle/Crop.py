@@ -1,4 +1,3 @@
-
 # A script to cut the image to pieces
 
 from PIL import Image

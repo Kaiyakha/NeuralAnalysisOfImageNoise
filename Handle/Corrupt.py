@@ -1,4 +1,3 @@
-
 # Create artificial noise on each image
 # The resulting images are in the R channel
 # But other channels can also be chosen

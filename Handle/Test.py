@@ -1,7 +1,7 @@
-
 # A script to test the network
 
-import os, dill
+import os
+import NeuralNetwork
 from GetData import *
 
 SIZE = WIDTH, HEIGHT = 28, 28
@@ -12,7 +12,7 @@ TARGET_PATH = DATA_PATH + "strip_ids_R.csv"
 
 X, Y = getData(TRAIN_PATH, TARGET_PATH)
 
-with open(PATH + "/trained_nn.pkl", "rb") as pklfile:
-    nn = dill.load(pklfile)
+network = NeuralNetwork.NeuralNetwork("dump.bin")
 
-nn.test(X, Y)
+accuracy = network.test(X, Y)
+print(f"Accuracy: {round(accuracy, 2)}%")

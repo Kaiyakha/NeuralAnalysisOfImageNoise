@@ -1,4 +1,3 @@
-
 # A script to comprise all the necessary data
 # To train the neural network
 
