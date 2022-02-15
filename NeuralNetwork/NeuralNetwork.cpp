@@ -6,15 +6,7 @@
 NeuralNetwork::NeuralNetwork(const py::dict& config) {
 	const py::list shape = config["shape_modifiers"];
 	this->layers = py::len(shape);
-	this->shape = new unsigned[layers];
-	this->activations = new VectorXd[layers];
-	this->weights = new MatrixXd[layers - 1];
-	this->weighted_sums = new VectorXd[layers - 1];
-	this->biases = new VectorXd[layers - 1];
-	this->deltas = new VectorXd[layers - 1];
-	this->actfuncs = new function_[layers - 1];
-	this->actfunc_ders = new function_[layers - 1];
-	this->func_params = new double[layers - 1];
+	this->allocate_memory();
 
 	for (unsigned l = 0; l < layers; l++) {
 		this->shape[l] = py::int_(shape[l]);
@@ -26,16 +18,8 @@ NeuralNetwork::NeuralNetwork(const py::dict& config) {
 		biases[l] = VectorXd::Zero(this->shape[l + 1]);
 	}	
 
-	const py::list function_names = config["activation_functions"];
-	if (py::len(function_names) != layers - 1)
-		throw std::runtime_error("Network depth does not correspond to the function list");
-	std::string function_name;
-	for (int i = 0; i < layers - 1; i++) {
-		function_name = py::str(function_names[i]);
-		actfuncs[i] = get_function_by_name(function_name);
-		actfunc_ders[i] = get_function_der_by_name(function_name);
-		if (!actfuncs[i] || !actfunc_ders[i]) throw std::runtime_error("Invalid function name has been passed");
-	}
+	function_names = config["activation_functions"];
+	this->set_activation_functions();
 
 	const py::list function_parameters = config["activation_function_parameters"];
 	if (py::len(function_parameters) != layers - 1)
@@ -44,6 +28,38 @@ NeuralNetwork::NeuralNetwork(const py::dict& config) {
 	for (int i = 0; i < layers - 1; i++) {
 		parameter = py::float_(function_parameters[i]);
 		func_params[i] = parameter;
+	}
+}
+
+
+NeuralNetwork::NeuralNetwork(const std::string& dumpfile) {
+	this->load(dumpfile);
+	this->set_activation_functions();
+}
+
+
+void NeuralNetwork::allocate_memory() {
+	this->shape = new unsigned[layers];
+	this->activations = new VectorXd[layers];
+	this->weights = new MatrixXd[layers - 1];
+	this->weighted_sums = new VectorXd[layers - 1];
+	this->biases = new VectorXd[layers - 1];
+	this->deltas = new VectorXd[layers - 1];
+	this->actfuncs = new function_[layers - 1];
+	this->actfunc_ders = new function_[layers - 1];
+	this->func_params = new double[layers - 1];
+}
+
+
+void NeuralNetwork::set_activation_functions() {
+	if (py::len(function_names) != layers - 1)
+		throw std::runtime_error("Network depth does not correspond to the function list");
+	std::string function_name;
+	for (int i = 0; i < layers - 1; i++) {
+		function_name = py::str(function_names[i]);
+		actfuncs[i] = get_function_by_name(function_name);
+		actfunc_ders[i] = get_function_der_by_name(function_name);
+		if (!actfuncs[i] || !actfunc_ders[i]) throw std::runtime_error("Invalid function name has been passed");
 	}
 }
 
@@ -151,6 +167,7 @@ const float NeuralNetwork::test(const MatrixXd& input, const MatrixXd& target) {
 
 
 NeuralNetwork::~NeuralNetwork() {
+	this->dump("dump.bin");
 	delete[] shape;
 	delete[] activations;
 	delete[] weights;
