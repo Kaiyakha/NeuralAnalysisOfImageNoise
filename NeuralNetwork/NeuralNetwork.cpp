@@ -129,13 +129,7 @@ void NeuralNetwork::train(const MatrixXd& input, const MatrixXd& target, const p
 	const double lr = py::float_(config["rate"]);
 
 	for (unsigned epoch = 0; epoch < epochs; epoch++) {
-		if (!(epoch % test_freq)) {
-			accuracy = test(input, target);
-			(accuracy > best_accuracy) && (best_accuracy = accuracy);
-			std::cout << "\rEpoch " << epoch << " | "
-			<< "Accuracy: " << accuracy << "% | "
-			<< "Best accuracy: " << best_accuracy << "%\t";
-		}
+		if (!(epoch % test_freq)) run_test(epoch, input, target);
 		i = uni(rng);
 		X = input.row(i);
 		Y = target.row(i);
@@ -163,6 +157,16 @@ const float NeuralNetwork::test(const MatrixXd& input, const MatrixXd& target) {
 	accuracy = (float)correct_predictions / (float)expected_predictions * 100;
 	accuracy = std::round(accuracy * 100) / 100;
 	return accuracy;
+}
+
+
+void NeuralNetwork::run_test(const unsigned epoch, const MatrixXd& input, const MatrixXd& target) {
+	static float accuracy, best_accuracy;
+	accuracy = test(input, target);
+	(accuracy > best_accuracy) && (best_accuracy = accuracy);
+	std::cout << "\rEpoch " << epoch << " | "
+		<< "Accuracy: " << accuracy << "% | "
+		<< "Best accuracy: " << best_accuracy << "%\t";
 }
 
 

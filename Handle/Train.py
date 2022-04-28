@@ -17,7 +17,7 @@ CONFIG_FILE = "config.ini"
 config_init, config_train = getConfig(CONFIG_FILE)
 X, Y = getData(TRAIN_PATH, TARGET_PATH)
 
-network = NeuralNetwork("dump.bin")
+network = NeuralNetwork(config_init)
     
 cursor.hide()
 print("\nTraining...")

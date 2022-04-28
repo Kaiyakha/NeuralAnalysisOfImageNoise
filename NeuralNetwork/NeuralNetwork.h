@@ -25,6 +25,7 @@ private:
 	void allocate_memory();
 	void set_activation_functions();
 	void backprop(const VectorXd& Y, const double lr);
+	void run_test(const unsigned epoch, const MatrixXd& input, const MatrixXd& target);
 	void dump(const std::string& filename) const;
 	void load(const std::string& filename);
 
