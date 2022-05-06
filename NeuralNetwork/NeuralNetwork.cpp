@@ -38,6 +38,13 @@ NeuralNetwork::NeuralNetwork(const std::string& dumpfile) {
 }
 
 
+NeuralNetwork::NeuralNetwork(const NeuralNetwork* src) {
+	this->layers = src->layers;
+	allocate_memory();
+	copy_state(src);
+}
+
+
 void NeuralNetwork::allocate_memory() {
 	this->shape = new unsigned[layers];
 	this->activations = new VectorXd[layers];
@@ -115,42 +122,50 @@ void NeuralNetwork::backprop(const VectorXd& Y, const double lr) {
 }
 
 
-void NeuralNetwork::train(const MatrixXd& input, const MatrixXd& target, const py::dict& config) {
-	float accuracy = 0, best_accuracy = 0;
-	Index i;
-	VectorXd X, Y, rv;
+void NeuralNetwork::init_train(const MatrixXd *input, const MatrixXd *target, const py::dict& config) {
+	this->input = input;
+	this->target = target;
+	this->epochs = py::int_(py::float_(config["epochs"]));
+	this->test_freq = py::int_(py::float_(config["test_frequency"]));
+	this->lr = py::float_(config["rate"]);
+	rng = Rnd<Index>(0, input->rows() - 1);
+}
 
-	std::random_device rd;
-	std::mt19937 rng(rd());
-	std::uniform_int_distribution<Index> uni(0, input.rows() - 1);
 
-	const unsigned epochs = py::int_(py::float_(config["epochs"]));
-	const unsigned test_freq = py::int_(py::float_(config["test_frequency"]));
-	const double lr = py::float_(config["rate"]);
+void NeuralNetwork::init_train(const MatrixXd *input, const MatrixXd *target, const unsigned epochs, const double lr) {
+	this->input = input;
+	this->target = target;
+	this->epochs = epochs;
+	this->test_freq = epochs;
+	this->lr = lr;
+	rng = Rnd<Index>(0, input->rows() - 1);
+}
 
+
+void NeuralNetwork::train(void) {	
 	for (unsigned epoch = 0; epoch < epochs; epoch++) {
-		if (!(epoch % test_freq)) run_test(epoch, input, target);
-		i = uni(rng);
-		X = input.row(i);
-		Y = target.row(i);
-		rv = forwardprop(X);
+		if (!(epoch % test_freq)) run_test(epoch);
+		i = rng();
+		X = input->row(i);
+		Y = target->row(i);
+		forwardprop(X);
 		backprop(Y, lr);
 	}
 }
 
 
-const float NeuralNetwork::test(const MatrixXd& input, const MatrixXd& target) {
+const float NeuralNetwork::test(const MatrixXd *input, const MatrixXd *target) {
 	Index expected_predictions = 0, correct_predictions = 0, ones;
 	VectorXd network_output;
 	VectorXi real_output_indices, expected_output_indices;
 	float accuracy;
 
-	for (Index i = 0; i < input.rows(); i++) {
-		network_output = forwardprop(input.row(i));
-		ones = target.row(i).count();
+	for (Index i = 0; i < input->rows(); i++) {
+		network_output = forwardprop(input->row(i));
+		ones = target->row(i).count();
 		expected_predictions += ones;
 		real_output_indices = argsort(network_output)(seqN(0, ones));
-		expected_output_indices = argsort(target.row(i))(seqN(0, ones));
+		expected_output_indices = argsort(target->row(i))(seqN(0, ones));
 		if (ones) correct_predictions += intersect1d_len(real_output_indices, expected_output_indices);
 	}
 
@@ -160,8 +175,8 @@ const float NeuralNetwork::test(const MatrixXd& input, const MatrixXd& target) {
 }
 
 
-void NeuralNetwork::run_test(const unsigned epoch, const MatrixXd& input, const MatrixXd& target) {
-	static float accuracy, best_accuracy;
+void NeuralNetwork::run_test(const unsigned epoch) {
+	static float accuracy, best_accuracy = 0;
 	accuracy = test(input, target);
 	(accuracy > best_accuracy) && (best_accuracy = accuracy);
 	std::cout << "\rEpoch " << epoch << " | "

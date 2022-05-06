@@ -127,6 +127,7 @@
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <WholeProgramOptimization>true</WholeProgramOptimization>
       <DebugInformationFormat>None</DebugInformationFormat>
+      <OpenMPSupport>true</OpenMPSupport>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -153,11 +154,15 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="NeuralNetwork.h" />
+    <ClInclude Include="Rnd.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Bind.cpp" />
     <ClCompile Include="NeuralNetwork.cpp" />
     <ClCompile Include="Serialize.cpp" />
+    <ClCompile Include="State.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="Tools.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

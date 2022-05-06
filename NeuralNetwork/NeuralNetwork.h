@@ -1,6 +1,7 @@
 #pragma once
 #include <pybind11/pybind11.h>
 #include <pybind11/Eigen.h>
+#include "Rnd.h"
 
 namespace py = pybind11;
 using namespace Eigen;
@@ -22,20 +23,33 @@ private:
 	function_* actfunc_ders;
 	double* func_params;
 
+//	train parameters
+	Rnd<Index> rng;
+	const MatrixXd *input, *target;
+	VectorXd X, Y;
+	Index i;
+	unsigned epochs, test_freq;
+	double lr;
+
+	NeuralNetwork(const NeuralNetwork* src); // init a copy of a network
 	void allocate_memory();
 	void set_activation_functions();
 	void backprop(const VectorXd& Y, const double lr);
-	void run_test(const unsigned epoch, const MatrixXd& input, const MatrixXd& target);
+	void init_train(const MatrixXd *input, const MatrixXd *target, const unsigned epochs, const double lr);
+	void run_test(const unsigned epoch);
 	void dump(const std::string& filename) const;
 	void load(const std::string& filename);
+	void copy_state(const NeuralNetwork* src);
+	void average_state(const NeuralNetwork* family[], unsigned count);
 
 public:
 	NeuralNetwork(const py::dict& config);
 	NeuralNetwork(const std::string& dumpfile);
 	void inspect() const;
 	const VectorXd& forwardprop(const VectorXd& X);
-	void train(const MatrixXd& input, const MatrixXd& target, const py::dict& config);
-	const float test(const MatrixXd& X, const MatrixXd& Y);
+	void init_train(const MatrixXd *input, const MatrixXd *target, const py::dict& config);
+	void train(void);
+	const float test(const MatrixXd *input, const MatrixXd *target);
 	~NeuralNetwork();
 };
 
