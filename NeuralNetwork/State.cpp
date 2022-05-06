@@ -11,11 +11,10 @@ void NeuralNetwork::copy_state(const NeuralNetwork* src) {
 }
 
 
-void NeuralNetwork::average_state(const NeuralNetwork* family[], unsigned count) {
+void NeuralNetwork::average_state(NeuralNetwork* family[], const unsigned count) {
 	size_t l;
-	--count;
 
-	for (unsigned id = 0; id < count; id++) {
+	for (unsigned id = 0; id < count - 1; id++) {
 		for (l = 0; l < layers - 1; l++) {
 			this->weights[l] += family[id]->weights[l];
 			this->biases[l] += family[id]->biases[l];

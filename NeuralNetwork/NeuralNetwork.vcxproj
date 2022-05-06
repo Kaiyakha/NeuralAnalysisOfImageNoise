@@ -159,6 +159,7 @@
   <ItemGroup>
     <ClCompile Include="Bind.cpp" />
     <ClCompile Include="NeuralNetwork.cpp" />
+    <ClCompile Include="Parallel.cpp" />
     <ClCompile Include="Serialize.cpp" />
     <ClCompile Include="State.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>

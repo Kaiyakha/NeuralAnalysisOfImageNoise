@@ -40,7 +40,9 @@ private:
 	void dump(const std::string& filename) const;
 	void load(const std::string& filename);
 	void copy_state(const NeuralNetwork* src);
-	void average_state(const NeuralNetwork* family[], unsigned count);
+	void average_state(NeuralNetwork* family[], const unsigned count);
+
+	void train_in_parallel_with_averaging(const int threads);
 
 public:
 	NeuralNetwork(const py::dict& config);

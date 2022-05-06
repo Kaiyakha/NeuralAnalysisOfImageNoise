@@ -129,6 +129,8 @@ void NeuralNetwork::init_train(const MatrixXd *input, const MatrixXd *target, co
 	this->test_freq = py::int_(py::float_(config["test_frequency"]));
 	this->lr = py::float_(config["rate"]);
 	rng = Rnd<Index>(0, input->rows() - 1);
+
+	this->train_in_parallel_with_averaging(8);
 }
 
 
@@ -144,7 +146,7 @@ void NeuralNetwork::init_train(const MatrixXd *input, const MatrixXd *target, co
 
 void NeuralNetwork::train(void) {	
 	for (unsigned epoch = 0; epoch < epochs; epoch++) {
-		if (!(epoch % test_freq)) run_test(epoch);
+		// if (!(epoch % test_freq)) run_test(epoch);
 		i = rng();
 		X = input->row(i);
 		Y = target->row(i);
@@ -186,7 +188,7 @@ void NeuralNetwork::run_test(const unsigned epoch) {
 
 
 NeuralNetwork::~NeuralNetwork() {
-	this->dump("dump.bin");
+	// this->dump("dump.bin");
 	delete[] shape;
 	delete[] activations;
 	delete[] weights;
