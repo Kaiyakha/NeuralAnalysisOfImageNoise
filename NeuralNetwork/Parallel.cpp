@@ -16,14 +16,14 @@ void NeuralNetwork::train_in_parallel_with_averaging(const int threads) {
 		else this->init_train(input, target, test_freq, lr);
 
 #		pragma omp barrier
-		for (unsigned epoch = 0; epoch < global_epochs; epoch++) {
+		for (unsigned epoch = 0; epoch < global_epochs; epoch += epochs) {
 			if (id) family[id - 1]->train();
 			else this->train();
 #			pragma omp barrier
 #			pragma omp master
 			{
 				this->average_state(family, threads);
-				this->run_test(epoch * epochs);
+				this->run_test(epoch);
 			}
 #			pragma omp barrier
 			if (id) family[id - 1]->copy_state(this);

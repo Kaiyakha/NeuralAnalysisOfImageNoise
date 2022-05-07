@@ -41,7 +41,16 @@ NeuralNetwork::NeuralNetwork(const std::string& dumpfile) {
 NeuralNetwork::NeuralNetwork(const NeuralNetwork* src) {
 	this->layers = src->layers;
 	allocate_memory();
-	copy_state(src);
+
+	std::copy(src->shape, src->shape + layers, this->shape);
+	std::copy(src->actfuncs, src->actfuncs + layers - 1, this->actfuncs);
+	std::copy(src->actfunc_ders, src->actfunc_ders + layers - 1, this->actfunc_ders);
+	std::copy(src->func_params, src->func_params + layers - 1, this->func_params);
+
+	for (unsigned l = 0; l < layers - 1; l++) {
+		weights[l] = MatrixXd::Random(this->shape[l + 1], this->shape[l]);
+		biases[l] = VectorXd::Zero(this->shape[l + 1]);
+	}
 }
 
 
@@ -130,7 +139,7 @@ void NeuralNetwork::init_train(const MatrixXd *input, const MatrixXd *target, co
 	this->lr = py::float_(config["rate"]);
 	rng = Rnd<Index>(0, input->rows() - 1);
 
-	this->train_in_parallel_with_averaging(8);
+	this->train_in_parallel_with_averaging(4);
 }
 
 

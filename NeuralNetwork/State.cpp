@@ -2,12 +2,8 @@
 
 
 void NeuralNetwork::copy_state(const NeuralNetwork* src) {
-	std::copy(src->shape, src->shape + layers, this->shape);
 	std::copy(src->weights, src->weights + layers - 1, this->weights);
 	std::copy(src->biases, src->biases + layers - 1, this->biases);
-	std::copy(src->actfuncs, src->actfuncs + layers - 1, this->actfuncs);
-	std::copy(src->actfunc_ders, src->actfunc_ders + layers - 1, this->actfunc_ders);
-	std::copy(src->func_params, src->func_params + layers - 1, this->func_params);
 }
 
 
