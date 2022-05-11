@@ -131,7 +131,9 @@ void NeuralNetwork::backprop(const VectorXd& Y, const double lr) {
 }
 
 
-void NeuralNetwork::init_train(const MatrixXd *input, const MatrixXd *target, const py::dict& config) {
+MatrixXd* NeuralNetwork::input = nullptr; MatrixXd* NeuralNetwork::target = nullptr;
+
+void NeuralNetwork::init_train(MatrixXd *input, MatrixXd *target, const py::dict& config) {
 	this->input = input;
 	this->target = target;
 	this->epochs = py::int_(py::float_(config["epochs"]));
@@ -143,13 +145,15 @@ void NeuralNetwork::init_train(const MatrixXd *input, const MatrixXd *target, co
 }
 
 
-void NeuralNetwork::init_train(const MatrixXd *input, const MatrixXd *target, const unsigned epochs, const double lr) {
-	this->input = input;
-	this->target = target;
+void NeuralNetwork::init_train(const int threads, const int thread_num, const unsigned epochs, const double lr) {
 	this->epochs = epochs;
 	this->test_freq = epochs;
 	this->lr = lr;
-	rng = Rnd<Index>(0, input->rows() - 1);
+
+	static const Index block_size = input->rows() / static_cast<Index>(threads);
+	const Index block_start = block_size * static_cast<Index>(thread_num);
+	const Index block_end = block_start + block_size - 1;
+	rng = Rnd<Index>(block_start, block_end);
 }
 
 

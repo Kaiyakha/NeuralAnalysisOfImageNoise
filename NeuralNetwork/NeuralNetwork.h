@@ -25,7 +25,7 @@ private:
 
 //	train parameters
 	Rnd<Index> rng;
-	const MatrixXd *input, *target;
+	static MatrixXd *input, *target;
 	VectorXd X, Y;
 	Index i;
 	unsigned epochs, test_freq;
@@ -35,7 +35,7 @@ private:
 	void allocate_memory();
 	void set_activation_functions();
 	void backprop(const VectorXd& Y, const double lr);
-	void init_train(const MatrixXd *input, const MatrixXd *target, const unsigned epochs, const double lr);
+	void init_train(const int threads, const int thread_num, const unsigned epochs, const double lr);
 	void run_test(const unsigned epoch);
 	void dump(const std::string& filename) const;
 	void load(const std::string& filename);
@@ -49,7 +49,7 @@ public:
 	NeuralNetwork(const std::string& dumpfile);
 	void inspect() const;
 	const VectorXd& forwardprop(const VectorXd& X);
-	void init_train(const MatrixXd *input, const MatrixXd *target, const py::dict& config);
+	void init_train(MatrixXd *input, MatrixXd *target, const py::dict& config);
 	void train(void);
 	const float test(const MatrixXd *input, const MatrixXd *target);
 	~NeuralNetwork();
