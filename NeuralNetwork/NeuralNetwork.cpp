@@ -1,5 +1,4 @@
 #include <iostream>
-#include <random>
 #include "NeuralNetwork.h"
 
 
@@ -28,28 +27,6 @@ NeuralNetwork::NeuralNetwork(const py::dict& config) {
 	for (int i = 0; i < layers - 1; i++) {
 		parameter = py::float_(function_parameters[i]);
 		func_params[i] = parameter;
-	}
-}
-
-
-NeuralNetwork::NeuralNetwork(const std::string& dumpfile) {
-	this->load(dumpfile);
-	this->set_activation_functions();
-}
-
-
-NeuralNetwork::NeuralNetwork(const NeuralNetwork* src) {
-	this->layers = src->layers;
-	allocate_memory();
-
-	std::copy(src->shape, src->shape + layers, this->shape);
-	std::copy(src->actfuncs, src->actfuncs + layers - 1, this->actfuncs);
-	std::copy(src->actfunc_ders, src->actfunc_ders + layers - 1, this->actfunc_ders);
-	std::copy(src->func_params, src->func_params + layers - 1, this->func_params);
-
-	for (unsigned l = 0; l < layers - 1; l++) {
-		weights[l] = MatrixXd::Random(this->shape[l + 1], this->shape[l]);
-		biases[l] = VectorXd::Zero(this->shape[l + 1]);
 	}
 }
 
@@ -132,34 +109,34 @@ void NeuralNetwork::backprop(const VectorXd& Y, const double lr) {
 
 
 MatrixXd* NeuralNetwork::input = nullptr; MatrixXd* NeuralNetwork::target = nullptr;
+double NeuralNetwork::lr = 0;
+double NeuralNetwork::delta_lr = 1;
+unsigned NeuralNetwork::accuracy_stuck_limit = UINT_MAX;
+unsigned NeuralNetwork::delta_accuracy_stuck_limit = 1;
 
 void NeuralNetwork::init_train(MatrixXd *input, MatrixXd *target, const py::dict& config) {
 	this->input = input;
 	this->target = target;
+
 	this->epochs = py::int_(py::float_(config["epochs"]));
 	this->test_freq = py::int_(py::float_(config["test_frequency"]));
 	this->lr = py::float_(config["rate"]);
+
+	if (py::bool_(config["dynamic_rate"])){
+		this->delta_lr = py::float_(config["rate_delta"]);
+		this->accuracy_stuck_limit = py::int_(py::float_(config["accuracy_stuck_limit"]));
+		this->delta_accuracy_stuck_limit = py::int_(config["accuracy_stuck_limit_delta"]);
+	}
+
 	rng = Rnd<Index>(0, input->rows() - 1);
 
 	this->train_in_parallel_with_averaging(4);
 }
 
 
-void NeuralNetwork::init_train(const int threads, const int thread_num, const unsigned epochs, const double lr) {
-	this->epochs = epochs;
-	this->test_freq = epochs;
-	this->lr = lr;
-
-	static const Index block_size = input->rows() / static_cast<Index>(threads);
-	const Index block_start = block_size * static_cast<Index>(thread_num);
-	const Index block_end = block_start + block_size - 1;
-	rng = Rnd<Index>(block_start, block_end);
-}
-
-
 void NeuralNetwork::train(void) {	
-	for (unsigned epoch = 0; epoch < epochs; epoch++) {
-		// if (!(epoch % test_freq)) run_test(epoch);
+	for (unsigned epoch = 1; epoch < epochs + 1; epoch++) {
+		if (!(epoch % (test_freq + 1))) run_test(epoch - (epoch / (test_freq + 1)));
 		i = rng();
 		X = input->row(i);
 		Y = target->row(i);
@@ -192,11 +169,24 @@ const float NeuralNetwork::test(const MatrixXd *input, const MatrixXd *target) {
 
 void NeuralNetwork::run_test(const unsigned epoch) {
 	static float accuracy, best_accuracy = 0;
+	static unsigned accuracy_not_increased_for = 0;
+
 	accuracy = test(input, target);
-	(accuracy > best_accuracy) && (best_accuracy = accuracy);
+
+	if (accuracy > best_accuracy) {
+		best_accuracy = accuracy;
+		accuracy_not_increased_for = 0;
+	}
+	else accuracy_not_increased_for += test_freq;
+	if (accuracy_not_increased_for > accuracy_stuck_limit) {
+		lr /= delta_lr;
+		accuracy_stuck_limit *= delta_accuracy_stuck_limit;
+		accuracy_not_increased_for = 0;
+	}
+
 	std::cout << "\rEpoch " << epoch << " | "
 		<< "Accuracy: " << accuracy << "% | "
-		<< "Best accuracy: " << best_accuracy << "%\t";
+		<< "Best accuracy: " << best_accuracy << "%\t\t";
 }
 
 

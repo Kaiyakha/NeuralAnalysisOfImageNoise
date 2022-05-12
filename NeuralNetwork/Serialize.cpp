@@ -7,6 +7,11 @@ template <class Container> static const Container readVector(std::ifstream& file
 static const MatrixXd readMatrix(std::ifstream& file);
 
 
+NeuralNetwork::NeuralNetwork(const std::string& dumpfile) {
+	this->load(dumpfile);
+	this->set_activation_functions();
+}
+
 void NeuralNetwork::dump(const std::string& filename) const {
 	std::ofstream file(filename, std::ios::binary);
 	if (!file.is_open()) throw std::exception("Failed to open a dump file");

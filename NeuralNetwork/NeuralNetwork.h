@@ -11,6 +11,7 @@ typedef const VectorXd(*function_)(const VectorXd&, double);
 class NeuralNetwork
 {
 private:
+//	network configuration
 	size_t layers;
 	unsigned* shape;
 	VectorXd* activations;
@@ -29,20 +30,26 @@ private:
 	VectorXd X, Y;
 	Index i;
 	unsigned epochs, test_freq;
-	double lr;
+	static double lr;
 
+//	dynamic learing rate
+	static double delta_lr;
+	static unsigned accuracy_stuck_limit;
+	static unsigned delta_accuracy_stuck_limit;
+
+//	private methods
 	NeuralNetwork(const NeuralNetwork* src); // init a copy of a network
 	void allocate_memory();
 	void set_activation_functions();
 	void backprop(const VectorXd& Y, const double lr);
-	void init_train(const int threads, const int thread_num, const unsigned epochs, const double lr);
+	void init_train(const int threads, const int thread_num, const unsigned epochs);
 	void run_test(const unsigned epoch);
 	void dump(const std::string& filename) const;
 	void load(const std::string& filename);
 	void copy_state(const NeuralNetwork* src);
 	void average_state(NeuralNetwork* family[], const unsigned count);
 
-	void train_in_parallel_with_averaging(const int threads);
+	void train_in_parallel_with_averaging(int threads);
 
 public:
 	NeuralNetwork(const py::dict& config);
