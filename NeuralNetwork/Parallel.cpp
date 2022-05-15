@@ -1,5 +1,4 @@
 #include <omp.h>
-#include <iostream>
 #include "NeuralNetwork.h"
 
 
@@ -21,7 +20,7 @@ NeuralNetwork::NeuralNetwork(const NeuralNetwork* src) {
 
 void NeuralNetwork::init_train(const int threads, const int thread_num, const unsigned epochs) {
 	this->epochs = epochs;
-	this->test_freq = epochs;
+	this->test_freq = epochs + 1;
 
 	static const Index block_size = input->rows() / static_cast<Index>(threads);
 	const Index block_start = block_size * static_cast<Index>(thread_num);
@@ -45,14 +44,14 @@ void NeuralNetwork::train_in_parallel_with_averaging(int threads) {
 		else this->init_train(threads, id, test_freq);
 
 #		pragma omp barrier
-		for (unsigned epoch = 0; epoch < global_epochs; epoch += epochs) {
+		for (unsigned epoch = 1; epoch <= global_epochs / epochs; epoch++) {
 			if (id) family[id - 1]->train();
 			else this->train();
 #			pragma omp barrier
 #			pragma omp master
 			{
 				this->average_state(family, threads);
-				this->run_test(epoch);
+				this->monitor(epoch * epochs);
 			}
 #			pragma omp barrier
 			if (id) family[id - 1]->copy_state(this);

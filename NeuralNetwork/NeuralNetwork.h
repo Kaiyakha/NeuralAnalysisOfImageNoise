@@ -38,13 +38,14 @@ private:
 	static unsigned delta_accuracy_stuck_limit;
 
 //	private methods
-	NeuralNetwork(const NeuralNetwork* src); // init a copy of a network
+	NeuralNetwork(const NeuralNetwork* src);
 	void allocate_memory();
 	void set_activation_functions();
-	void backprop(const VectorXd& Y, const double lr);
+	void backprop(const VectorXd& Y, const double lr) noexcept;
+	void init_train(MatrixXd* input, MatrixXd* target, const py::dict& config);
 	void init_train(const int threads, const int thread_num, const unsigned epochs);
-	void run_test(const unsigned epoch);
-	void dump(const std::string& filename) const;
+	void train(void) noexcept;
+	void monitor(const unsigned epoch) noexcept;
 	void load(const std::string& filename);
 	void copy_state(const NeuralNetwork* src);
 	void average_state(NeuralNetwork* family[], const unsigned count);
@@ -54,12 +55,13 @@ private:
 public:
 	NeuralNetwork(const py::dict& config);
 	NeuralNetwork(const std::string& dumpfile);
-	void inspect() const;
+	void inspect(void) const noexcept;
 	const VectorXd& forwardprop(const VectorXd& X);
-	void init_train(MatrixXd *input, MatrixXd *target, const py::dict& config);
-	void train(void);
 	const float test(const MatrixXd *input, const MatrixXd *target);
+	void dump(const std::string& filename) const;
 	~NeuralNetwork();
+
+	friend void launch_train(NeuralNetwork& network, MatrixXd* input, MatrixXd* target, const py::dict& config);
 };
 
 const VectorXd sigmoid(const VectorXd& X, const double width);

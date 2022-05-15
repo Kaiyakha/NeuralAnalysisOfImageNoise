@@ -4,8 +4,8 @@
 
 NeuralNetwork::NeuralNetwork(const py::dict& config) {
 	const py::list shape = config["shape_modifiers"];
-	this->layers = py::len(shape);
-	this->allocate_memory();
+	layers = py::len(shape);
+	allocate_memory();
 
 	for (unsigned l = 0; l < layers; l++) {
 		this->shape[l] = py::int_(shape[l]);
@@ -18,7 +18,7 @@ NeuralNetwork::NeuralNetwork(const py::dict& config) {
 	}	
 
 	function_names = config["activation_functions"];
-	this->set_activation_functions();
+	set_activation_functions();
 
 	const py::list function_parameters = config["activation_function_parameters"];
 	if (py::len(function_parameters) != layers - 1)
@@ -32,15 +32,15 @@ NeuralNetwork::NeuralNetwork(const py::dict& config) {
 
 
 void NeuralNetwork::allocate_memory() {
-	this->shape = new unsigned[layers];
-	this->activations = new VectorXd[layers];
-	this->weights = new MatrixXd[layers - 1];
-	this->weighted_sums = new VectorXd[layers - 1];
-	this->biases = new VectorXd[layers - 1];
-	this->deltas = new VectorXd[layers - 1];
-	this->actfuncs = new function_[layers - 1];
-	this->actfunc_ders = new function_[layers - 1];
-	this->func_params = new double[layers - 1];
+	shape = new unsigned[layers];
+	activations = new VectorXd[layers];
+	weights = new MatrixXd[layers - 1];
+	weighted_sums = new VectorXd[layers - 1];
+	biases = new VectorXd[layers - 1];
+	deltas = new VectorXd[layers - 1];
+	actfuncs = new function_[layers - 1];
+	actfunc_ders = new function_[layers - 1];
+	func_params = new double[layers - 1];
 }
 
 
@@ -57,10 +57,10 @@ void NeuralNetwork::set_activation_functions() {
 }
 
 
-void NeuralNetwork::inspect() const {
+void NeuralNetwork::inspect(void) const noexcept {
 	using namespace std;
 	cout << "=============NeuralNetwork===============\n";
-	unsigned l;
+	size_t l;
 
 	cout << "\nShape:";
 	for (l = 0; l < layers; l++) cout << " " << shape[l];
@@ -75,7 +75,7 @@ void NeuralNetwork::inspect() const {
 	cout << "\nActivations:\n";
 	cout << "----------------------------------\n";
 	for (l = 0; l < layers; l++) {
-		cout << activations[l].transpose() << endl;
+		cout << activations[l].transpose() << '\n';
 	}
 	cout << "----------------------------------" << endl;
 }
@@ -95,7 +95,7 @@ const VectorXd& NeuralNetwork::forwardprop(const VectorXd& X) {
 }
 
 
-void NeuralNetwork::backprop(const VectorXd& Y, const double lr) {
+void NeuralNetwork::backprop(const VectorXd& Y, const double lr) noexcept {
 	deltas[layers - 2] = (Y - activations[layers - 1]).cwiseProduct(actfunc_ders[layers - 2](weighted_sums[layers - 2], func_params[layers - 2]));
 	for (size_t l = layers - 2; l > 0; l--) {
 		deltas[l - 1] = (weights[l].transpose() * deltas[l]).cwiseProduct(actfunc_ders[l - 1](weighted_sums[l - 1], func_params[l - 1]));
@@ -118,25 +118,24 @@ void NeuralNetwork::init_train(MatrixXd *input, MatrixXd *target, const py::dict
 	this->input = input;
 	this->target = target;
 
-	this->epochs = py::int_(py::float_(config["epochs"]));
-	this->test_freq = py::int_(py::float_(config["test_frequency"]));
-	this->lr = py::float_(config["rate"]);
+	epochs = py::int_(py::float_(config["epochs"]));
+	test_freq = py::int_(py::float_(config["test_frequency"]));
+	lr = py::float_(config["rate"]);
 
 	if (py::bool_(config["dynamic_rate"])){
-		this->delta_lr = py::float_(config["rate_delta"]);
-		this->accuracy_stuck_limit = py::int_(py::float_(config["accuracy_stuck_limit"]));
-		this->delta_accuracy_stuck_limit = py::int_(config["accuracy_stuck_limit_delta"]);
+		delta_lr = py::float_(config["rate_delta"]);
+		accuracy_stuck_limit = py::int_(py::float_(config["accuracy_stuck_limit"]));
+		delta_accuracy_stuck_limit = py::int_(config["accuracy_stuck_limit_delta"]);
 	}
 
-	rng = Rnd<Index>(0, input->rows() - 1);
-
-	this->train_in_parallel_with_averaging(4);
+	if (!py::bool_(config["parallel_training"]))
+		rng = Rnd<Index>(0, input->rows() - 1);
 }
 
 
-void NeuralNetwork::train(void) {	
+void NeuralNetwork::train(void) noexcept {	
 	for (unsigned epoch = 1; epoch < epochs + 1; epoch++) {
-		if (!(epoch % (test_freq + 1))) run_test(epoch - (epoch / (test_freq + 1)));
+		if (!(epoch % test_freq)) [[unlikely]] monitor(epoch);
 		i = rng();
 		X = input->row(i);
 		Y = target->row(i);
@@ -167,7 +166,7 @@ const float NeuralNetwork::test(const MatrixXd *input, const MatrixXd *target) {
 }
 
 
-void NeuralNetwork::run_test(const unsigned epoch) {
+void NeuralNetwork::monitor(const unsigned epoch) noexcept {
 	static float accuracy, best_accuracy = 0;
 	static unsigned accuracy_not_increased_for = 0;
 
@@ -178,7 +177,7 @@ void NeuralNetwork::run_test(const unsigned epoch) {
 		accuracy_not_increased_for = 0;
 	}
 	else accuracy_not_increased_for += test_freq;
-	if (accuracy_not_increased_for > accuracy_stuck_limit) {
+	if (accuracy_not_increased_for > accuracy_stuck_limit) [[unlikely]] {
 		lr /= delta_lr;
 		accuracy_stuck_limit *= delta_accuracy_stuck_limit;
 		accuracy_not_increased_for = 0;
@@ -191,7 +190,6 @@ void NeuralNetwork::run_test(const unsigned epoch) {
 
 
 NeuralNetwork::~NeuralNetwork() {
-	// this->dump("dump.bin");
 	delete[] shape;
 	delete[] activations;
 	delete[] weights;

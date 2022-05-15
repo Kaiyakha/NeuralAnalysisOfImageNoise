@@ -17,8 +17,11 @@ def getConfig(config_file) -> tuple:
     config_init["shape_modifiers"].insert(0, str(int(WIDTH) * int(HEIGHT)))
     config_init["shape_modifiers"].append(WIDTH)
     
-    config_train = dict(config.items("train_parameters") + config.items("dynamic_rate"))
-    if config_train["dynamic_rate"] not in ["true", "True", "enable", "Enable"]:
+    config_train = dict(config.items("train_parameters") + config.items("dynamic_rate") + config.items("parallel_training"))
+    ENABLE = "true", "True", "enable", "Enable"
+    if config_train["dynamic_rate"] not in ENABLE:
         config_train["dynamic_rate"] = False
+    if (config_train["parallel_training"] not in ENABLE) or (int(config_train["threads"]) < 2):
+        config_train["parallel_training"] = False
 
     return config_init, config_train
