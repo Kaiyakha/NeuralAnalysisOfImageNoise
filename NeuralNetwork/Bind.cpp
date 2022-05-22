@@ -8,6 +8,7 @@ static void launch_train(NeuralNetwork& network, MatrixXd* input, MatrixXd* targ
 		network.train_in_parallel_with_averaging(threads);
 	}
 	else network.train();
+	network.total_epochs += py::int_(py::float_(config["epochs"]));
 }
 
 

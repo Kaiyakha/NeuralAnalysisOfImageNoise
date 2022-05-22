@@ -113,6 +113,7 @@ double NeuralNetwork::lr = 0;
 double NeuralNetwork::delta_lr = 1;
 unsigned NeuralNetwork::accuracy_stuck_limit = UINT_MAX;
 unsigned NeuralNetwork::delta_accuracy_stuck_limit = 1;
+unsigned NeuralNetwork::total_epochs = 0;
 
 void NeuralNetwork::init_train(MatrixXd *input, MatrixXd *target, const py::dict& config) {
 	this->input = input;
@@ -183,9 +184,9 @@ void NeuralNetwork::monitor(const unsigned epoch) noexcept {
 		accuracy_not_increased_for = 0;
 	}
 
-	std::cout << "\rEpoch " << epoch << " | "
+	std::cout << "\rEpoch " << epoch + total_epochs << " | "
 		<< "Accuracy: " << accuracy << "% | "
-		<< "Best accuracy: " << best_accuracy << "%\t\t";
+		<< "Best accuracy: " << best_accuracy << "%\33[0K";
 }
 
 

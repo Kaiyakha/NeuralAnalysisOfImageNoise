@@ -1,7 +1,6 @@
 #include <omp.h>
 #include "NeuralNetwork.h"
 
-
 NeuralNetwork::NeuralNetwork(const NeuralNetwork* src) {
 	this->layers = src->layers;
 	allocate_memory();
@@ -39,6 +38,8 @@ void NeuralNetwork::train_in_parallel_with_averaging(int threads) {
 		const int id = omp_get_thread_num();
 #		pragma omp single
 		threads = omp_get_num_threads();
+
+		if (id && total_epochs) family[id - 1]->copy_state(this);
 
 		if (id) family[id - 1]->init_train(threads, id, test_freq);
 		else this->init_train(threads, id, test_freq);

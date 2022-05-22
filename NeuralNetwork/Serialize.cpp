@@ -8,8 +8,8 @@ static const MatrixXd readMatrix(std::ifstream& file);
 
 
 NeuralNetwork::NeuralNetwork(const std::string& dumpfile) {
-	this->load(dumpfile);
-	this->set_activation_functions();
+	load(dumpfile);
+	set_activation_functions();
 }
 
 void NeuralNetwork::dump(const std::string& filename) const {
@@ -27,6 +27,7 @@ void NeuralNetwork::dump(const std::string& filename) const {
 		writeVector((const std::string)py::str(function_names[i]), file);
 	}	
 	file.write((const char*)func_params, sizeof *func_params * (layers - 1));
+	file.write((const char*)&total_epochs, sizeof total_epochs);
 
 	file.close();
 }
@@ -49,6 +50,7 @@ void NeuralNetwork::load(const std::string& filename) {
 		function_names.append(readVector<std::string>(file));
 	}
 	file.read((char*)func_params, sizeof *func_params * (layers - 1));
+	file.read((char*)&total_epochs, sizeof total_epochs);
 
 	file.close();
 }

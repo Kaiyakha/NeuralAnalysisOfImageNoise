@@ -31,6 +31,7 @@ private:
 	Index i;
 	unsigned epochs, test_freq;
 	static double lr;
+	static unsigned total_epochs;
 
 //	dynamic learing rate
 	static double delta_lr;

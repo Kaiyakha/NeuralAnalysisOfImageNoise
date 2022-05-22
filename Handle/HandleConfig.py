@@ -1,9 +1,12 @@
 from configparser import ConfigParser
 
 
-def getConfig(config_file) -> tuple:
-    config = ConfigParser()
-    config.read(config_file)
+def _getConfig(config_file: str) -> ConfigParser:
+    ...
+
+
+def getConfigInit(config_file: str) -> dict:
+    config = _getConfig(config_file)    
 
     split_char = config["meta"]["split_char"][1:-1]
 
@@ -16,7 +19,13 @@ def getConfig(config_file) -> tuple:
         config_init["shape_modifiers"][i] = str(modifier)
     config_init["shape_modifiers"].insert(0, str(int(WIDTH) * int(HEIGHT)))
     config_init["shape_modifiers"].append(WIDTH)
-    
+
+    return config_init
+
+
+def getConfigTrain(config_file: str) -> dict:
+    config = _getConfig(config_file)
+
     config_train = dict(config.items("train_parameters") + config.items("dynamic_rate") + config.items("parallel_training"))
     ENABLE = "true", "True", "enable", "Enable"
     if config_train["dynamic_rate"] not in ENABLE:
@@ -24,4 +33,19 @@ def getConfig(config_file) -> tuple:
     if (config_train["parallel_training"] not in ENABLE) or (int(config_train["threads"]) < 2):
         config_train["parallel_training"] = False
 
-    return config_init, config_train
+    return config_train
+
+
+def getConfigDefaults(config_file: str) -> dict:
+    config = _getConfig(config_file)
+
+    config_path = dict(config.items("default_path") + config.items("defaults"))
+    config_path["relative"] = True if config_path["relative"].lower() == "true" else False
+
+    return config_path
+
+
+def _getConfig(config_file: str) -> ConfigParser:
+    config = ConfigParser()
+    config.read(config_file)
+    return config

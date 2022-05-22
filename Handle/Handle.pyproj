@@ -31,14 +31,13 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Check.py" />
+    <Compile Include="CLI.py" />
     <Compile Include="Corrupt.py" />
     <Compile Include="Crop.py" />
+    <Compile Include="Defaults.py" />
     <Compile Include="GetData.py" />
     <Compile Include="HandleConfig.py" />
-    <Compile Include="NN.py" />
     <Compile Include="Test.py" />
-    <Compile Include="TestConfig.py" />
     <Compile Include="Train.py" />
   </ItemGroup>
   <ItemGroup>

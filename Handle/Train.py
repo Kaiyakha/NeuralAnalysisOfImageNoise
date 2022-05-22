@@ -4,7 +4,7 @@
 # to continue the training on the next run of the script
 
 import os, cursor, time
-from HandleConfig import getConfig
+from HandleConfig import getConfigInit, getConfigTrain
 from GetData import getData
 from NeuralNetwork import *
 
@@ -17,7 +17,7 @@ CONFIG_FILE = "config.ini"
 cursor.hide()
 print("Initialising...", end = '\r')
 
-config_init, config_train = getConfig(CONFIG_FILE)
+config_init, config_train = getConfigInit(CONFIG_FILE), getConfigTrain(CONFIG_FILE)
 X, Y = getData(TRAIN_PATH, TARGET_PATH)
 
 network = NeuralNetwork(config_init)
