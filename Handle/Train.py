@@ -3,13 +3,14 @@
 # gets stored into a .pkl file so that it can be uploaded
 # to continue the training on the next run of the script
 
-import os, cursor, time
+import os, sys, cursor, time
+sys.path.append("../NeuralNetwork/x64/Debug")
 from HandleConfig import getConfigInit, getConfigTrain
 from GetData import getData
 from NeuralNetwork import *
 
 PATH = os.path.dirname(__file__) + "/../Items"
-DATA_PATH = PATH + "/Patches/Noisy_Patches/"
+DATA_PATH = PATH + "/Noisy_Patches/"
 TRAIN_PATH = DATA_PATH + "R/"
 TARGET_PATH = DATA_PATH + "strip_ids_R.csv"
 CONFIG_FILE = "config.ini"

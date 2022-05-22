@@ -41,5 +41,8 @@
     <ClCompile Include="Parallel.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="VTMode.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

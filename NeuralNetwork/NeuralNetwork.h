@@ -75,3 +75,5 @@ function_ get_function_der_by_name(const std::string& name);
 
 const VectorXi argsort(VectorXd X);
 const Index intersect1d_len(VectorXi X, VectorXi Y);
+
+const std::string get_terminator(void) noexcept;

@@ -5,6 +5,7 @@ sys.path.append("../NeuralNetwork/x64/Debug")
 
 import NeuralNetwork as nn
 from HandleConfig import getConfigInit, getConfigTrain
+from Corrupt import corrupt
 from GetData import getData
 import Defaults
 
@@ -13,8 +14,8 @@ app = typer.Typer()
 
 @app.command("init", help = "Initialise a new network")
 def init_network(
-    config_file: str = typer.Option(Defaults._DEFAULT_CONFIG_FILE, "-c", "--config-file", help = "Configuration file"),
-    dumpfile: str = typer.Option(Defaults.DEFAULT_DUMPFILE, "-d", "--dumpfile", help = "A binary file to store the configuration")
+    config_file: str = typer.Option(Defaults._CONFIG_FILE, "-c", "--config-file", help = "Configuration file"),
+    dumpfile: str = typer.Option(Defaults.DUMPFILE, "-d", "--dumpfile", help = "A binary file to store the configuration")
 ):
     config_init = getConfigInit(config_file)
     network = nn.NeuralNetwork(config_init)
@@ -22,6 +23,7 @@ def init_network(
 
 
 def _getModel(dumpfile, data_path, channel, reverse_dataset, dataset_size):
+    if channel not in Defaults._IMAGERY_RANGE: raise ValueError("Channel must be R, G or B")
     input_data = data_path + channel + '/'
     ground_truth = data_path + Defaults.CSV_FILENAME(channel)
     X, Y = getData(input_data, ground_truth)
@@ -35,11 +37,11 @@ def _getModel(dumpfile, data_path, channel, reverse_dataset, dataset_size):
 @app.command(help = "Run training")
 def train(
     data_path: str = typer.Option(Defaults.DATASET, "-p", "--data-path", help = "Data for training"),
-    channel: str = typer.Option(Defaults.CHANNEL, "-ch", "--channel", help = "A channel from the RGB range"),
+    channel: str = typer.Option(Defaults.CHANNEL, "-ch", "--channel", help = f"A channel from the {Defaults._IMAGERY_RANGE} range"),
     reverse_dataset: bool = typer.Option(False, "-r", "--reverse-dataset", help = "Invert the order of the elements in the dataset"),
-    dataset_size: float = typer.Option(Defaults.DEFAULT_TRAIN_DATASET_SIZE, "-s", "--dataset-size", help = "Multiply the size of the dataset by the value"),
-    config_file: str = typer.Option(Defaults._DEFAULT_CONFIG_FILE, "-c", "--config-file", help = "Configuration file"),
-    dumpfile: str = typer.Option(Defaults.DEFAULT_DUMPFILE, "-d", "--dumpfile", help = "A binary file to store and load the configuration"),
+    dataset_size: float = typer.Option(Defaults.TRAIN_DATASET_SIZE, "-s", "--dataset-size", help = "Multiply the size of the dataset by the value"),
+    config_file: str = typer.Option(Defaults._CONFIG_FILE, "-c", "--config-file", help = "Configuration file"),
+    dumpfile: str = typer.Option(Defaults.DUMPFILE, "-d", "--dumpfile", help = "A binary file to store and load the configuration"),
     dump: bool = typer.Option(True, "--no-dump", help = "Do not dump the configuration", show_default = False)
 ):
     typer.echo("Initialising...", nl = False)
@@ -60,16 +62,30 @@ def train(
 @app.command(help = "Run test")
 def test(
     data_path: str = typer.Option(Defaults.DATASET, "-p", "--data-path", help = "Data for testing"),
-    channel: str = typer.Option(Defaults.CHANNEL, "-ch", "--channel", help = "A channel from the RGB range"),
+    channel: str = typer.Option(Defaults.CHANNEL, "-ch", "--channel", help = f"A channel from the {Defaults._IMAGERY_RANGE} range"),
     reverse_dataset: bool = typer.Option(True, "-nr", "--no-reverse-dataset", show_default = False, help = "Do not invert the order of the elements in the dataset"),
-    dataset_size: float = typer.Option(round(1 - Defaults.DEFAULT_TRAIN_DATASET_SIZE, 2), "-s", "--dataset-size", help = "Multiply the size of the dataset by the value"),
-    dumpfile: str = typer.Option(Defaults.DEFAULT_DUMPFILE, "-d", "--dumpfile", help = "A binary file to load the configuration")
+    dataset_size: float = typer.Option(round(1 - Defaults.TRAIN_DATASET_SIZE, 2), "-s", "--dataset-size", help = "Multiply the size of the dataset by the value"),
+    dumpfile: str = typer.Option(Defaults.DUMPFILE, "-d", "--dumpfile", help = "A binary file to load the configuration")
 ):
     typer.echo("Initialising...", nl = False)
     network, X, Y = _getModel(dumpfile, data_path, channel, reverse_dataset, dataset_size)
     typer.echo("\rTesting...\33[0K")
     accuracy = network.test(X, Y)
     typer.echo(f"Accuracy: {round(accuracy, 2)}%")
+
+
+@app.command("corrupt", help = "Corrupt the images with vertical strips")
+def corrupt_(
+    input_path: str = typer.Option(Defaults.CLEAR_PATCHES, "-i", "--input-path", help = "Path to images to corrupt"),
+    output_path: str = typer.Option(Defaults.DATASET, "-o", "--output-path", help = "Path to store the output to"),
+    channel: str = typer.Argument(..., help = "A channel from the RGB range to provide the result"),
+    csv_filename_template: str = typer.Option(Defaults.CSV_FILENAME_TEMPLATE, "-f", "--csv-filename", help = "CSV filename template"),
+    strip_freq: float = typer.Option(Defaults.STRIP_FREQUENCY, "-sf", "--strip-freq", help = "Corruption probability for a single strip")
+):
+    if channel not in Defaults._IMAGERY_RANGE: raise ValueError("Channel must be R, G or B")
+    if not 0 < strip_freq < 1: raise ValueError("Corruption probability must be in range (0, 1)")
+    csv_filename = Defaults.CSV_FILENAME(channel)
+    corrupt(input_path, output_path, channel, csv_filename, strip_freq)
 
 
 if __name__ == "__main__":

@@ -1,9 +1,10 @@
 import os
 from HandleConfig import getConfigDefaults
 
-_DEFAULT_CONFIG_FILE = "config.ini"
+_CONFIG_FILE = "config.ini"
+_IMAGERY_RANGE = "RGB"
 
-config_defaults = getConfigDefaults(_DEFAULT_CONFIG_FILE)
+config_defaults = getConfigDefaults(_CONFIG_FILE)
 
 ITEMS_PATH = os.path.dirname(__file__).replace("\\", "/") if config_defaults["relative"] else ""
 
@@ -15,8 +16,9 @@ if not CLEAR_PATCHES.endswith('/'): CLEAR_PATCHES += '/'
 DATASET = ITEMS_PATH + config_defaults["dataset_path"]
 if not DATASET.endswith('/'): DATASET += '/'
 CHANNEL = config_defaults["channel"].upper()
-if CHANNEL not in ("R", "G", "B"): raise ValueError("Channel must be R, G or B")
-CSV_FILENAME = lambda ch: f"strip_ids_{ch}.csv"
+CSV_FILENAME_TEMPLATE = config_defaults["csv_filename_template"]
+CSV_FILENAME = lambda channel: f"{CSV_FILENAME_TEMPLATE}{channel}.csv"
 
-DEFAULT_DUMPFILE = config_defaults["dumpfile"]
-DEFAULT_TRAIN_DATASET_SIZE = float(config_defaults["dataset_size"])
+DUMPFILE = config_defaults["dumpfile"]
+TRAIN_DATASET_SIZE = float(config_defaults["train_dataset_size"])
+STRIP_FREQUENCY = float(config_defaults["strip_frequency"])

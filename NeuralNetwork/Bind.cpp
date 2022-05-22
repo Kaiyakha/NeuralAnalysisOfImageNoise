@@ -16,7 +16,7 @@ PYBIND11_MODULE(NeuralNetwork, mod) {
 	py::class_<NeuralNetwork>(mod, "NeuralNetwork")
 		.def(py::init<const py::dict&>())
 		.def(py::init<const std::string&>())
-		.def("inspect", &NeuralNetwork::inspect)
+		.def("_inspect", &NeuralNetwork::inspect)
 		.def("__call__", [](NeuralNetwork& network, const VectorXd& X) { return network.forwardprop(X); })
 		.def("train", &launch_train)
 		.def("test", &NeuralNetwork::test)
