@@ -10,7 +10,7 @@ def getConfigInit(config_file: str) -> dict:
 
     split_char = config["meta"]["split_char"][1:-1]
 
-    config_init = dict(config.items("network_configuration"))
+    config_init = dict(config.items("image_resolution") + config.items("network_configuration"))
     for key in config_init: config_init[key] = config_init[key].split(split_char)
     
     WIDTH, HEIGHT = config_init["image_resolution"]
@@ -39,10 +39,10 @@ def getConfigTrain(config_file: str) -> dict:
 def getConfigDefaults(config_file: str) -> dict:
     config = _getConfig(config_file)
 
-    config_path = dict(config.items("default_path") + config.items("defaults"))
-    config_path["relative"] = True if config_path["relative"].lower() == "true" else False
+    config_defaults = dict(config.items("meta") + config.items("image_resolution") + config.items("default_path") + config.items("defaults"))
+    config_defaults["relative"] = True if config_defaults["relative"].lower() == "true" else False
 
-    return config_path
+    return config_defaults
 
 
 def _getConfig(config_file: str) -> ConfigParser:

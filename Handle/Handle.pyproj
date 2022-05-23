@@ -32,8 +32,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CLI.py" />
-    <Compile Include="Corrupt.py" />
-    <Compile Include="Crop.py" />
+    <Compile Include="Imagery.py" />
     <Compile Include="Defaults.py" />
     <Compile Include="GetData.py" />
     <Compile Include="HandleConfig.py" />

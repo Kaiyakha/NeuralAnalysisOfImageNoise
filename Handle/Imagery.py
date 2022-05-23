@@ -8,13 +8,30 @@ from typer import echo
 from PIL import Image
 
 
+def crop(input_file: str, output_path: str, patch_size: tuple):
+    _makeDir(output_path)
+
+    scene = Image.open(input_file)
+    width, height = patch_size
+	
+    for i in range(0, scene.width - width, width):
+	    for j in range(0, scene.height - height, height):
+		    patch = scene.crop((i, j, i + width, j + height))
+		    patch.save(output_path + f"{i}, {j}.bmp", 'bmp')
+		    patch.close()
+	    percent = round(i / (scene.width - width) * 100)
+	    echo(f"\rCropping... {percent}%\33[0K", nl = False)
+    echo(f"\rThe image has been successfully cropped.\33[0K", nl = False)
+
+    scene.close()
+
+
 def corrupt(input_path: str, output_path: str, channel: str, csv_filename: str, strip_freq: float):
     images = os.listdir(input_path)
     corrupted_image_path = output_path + channel + '/'
     csv_file_path = output_path + csv_filename
     channel = "RGB".index(channel)
-    try: os.makedirs(corrupted_image_path)
-    except FileExistsError: pass
+    _makeDir(corrupted_image_path)
 
     Y = []
     for file in images:
@@ -36,12 +53,22 @@ def corrupt(input_path: str, output_path: str, channel: str, csv_filename: str, 
         fields = "Image", "Ids"
         writer = csv.DictWriter(csvfile, fieldnames = fields, delimiter = ";")
         writer.writeheader()
-        echo()
         for i in range(len(Y)):
             writer.writerow({"Image": images[i], "Ids": Y[i]})
             if i % 100 == 0:
                 percent = round(i / len(Y) * 100)
                 echo (f"\rComprising data... {percent}%\33[0K", nl = False)
+    echo(f"\rThe pathces have been successfully corrupted.\33[0K", nl = False)
+
+
+def _makeDir(path: str):
+    try: os.makedirs(path)
+    except FileExistsError:
+	    items = os.listdir(path)
+	    for item in items:
+		    os.remove(path + item)
+		    percent = round(items.index(item) / len(items) * 100)
+		    echo(f"\rClearing... {percent}%\33[0K", nl = False)
 
 
 def _makeNoise(img, strip_freq: float):

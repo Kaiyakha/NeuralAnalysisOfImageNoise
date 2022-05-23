@@ -5,7 +5,7 @@ sys.path.append("../NeuralNetwork/x64/Debug")
 
 import NeuralNetwork as nn
 from HandleConfig import getConfigInit, getConfigTrain
-from Corrupt import corrupt
+import Imagery
 from GetData import getData
 import Defaults
 
@@ -74,9 +74,19 @@ def test(
     typer.echo(f"Accuracy: {round(accuracy, 2)}%")
 
 
-@app.command("corrupt", help = "Corrupt the images with vertical strips")
-def corrupt_(
-    input_path: str = typer.Option(Defaults.CLEAR_PATCHES, "-i", "--input-path", help = "Path to images to corrupt"),
+@app.command(help = "Crop an image into patches")
+def crop(
+    input_file: str = typer.Option(Defaults.IMAGE_FILE, "-i", "--input-path", help = "Path to an image to crop"),
+    output_path: str = typer.Option(Defaults.PATCHES, "-o", "--output-path", help = "Output path"),
+    patch_size: str = typer.Option(Defaults.PATCH_SIZE, "-s", "--patch-size", help = f"Size of each patch, values must be separated with {Defaults._CLI_SPLITTER}")
+):
+    patch_size = tuple([int(value) for value in patch_size.split(Defaults._CLI_SPLITTER)])
+    Imagery.crop(input_file, output_path, patch_size)
+
+
+@app.command(help = "Corrupt the images with vertical strips")
+def corrupt(
+    input_path: str = typer.Option(Defaults.PATCHES, "-i", "--input-path", help = "Path to images to corrupt"),
     output_path: str = typer.Option(Defaults.DATASET, "-o", "--output-path", help = "Path to store the output to"),
     channel: str = typer.Argument(..., help = "A channel from the RGB range to provide the result"),
     csv_filename_template: str = typer.Option(Defaults.CSV_FILENAME_TEMPLATE, "-f", "--csv-filename", help = "CSV filename template"),
@@ -85,7 +95,7 @@ def corrupt_(
     if channel not in Defaults._IMAGERY_RANGE: raise ValueError("Channel must be R, G or B")
     if not 0 < strip_freq < 1: raise ValueError("Corruption probability must be in range (0, 1)")
     csv_filename = Defaults.CSV_FILENAME(channel)
-    corrupt(input_path, output_path, channel, csv_filename, strip_freq)
+    Imagery.corrupt(input_path, output_path, channel, csv_filename, strip_freq)
 
 
 if __name__ == "__main__":
