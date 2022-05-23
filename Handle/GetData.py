@@ -5,17 +5,23 @@ import os, csv
 import numpy as np
 from PIL import Image
 
-def getData(train_path: str, target_path: str):
+
+def getVector(path: str, filename: str):
+    img = Image.open(path + filename)
+    img_vector = np.asarray(img).reshape(img.width * img.height)
+    return img, img_vector
+
+
+def getDataset(input_path: str, ground_truth_path: str):
     X = []
-    for file in os.listdir(train_path):
-        img = Image.open(train_path + file)
-        img_matrix = np.asarray(img).reshape(img.width * img.height)
+    for file in os.listdir(input_path):
+        img, img_vector = getVector(input_path, file)
         img.close()
-        X.append(img_matrix)
+        X.append(img_vector)
     X = np.array(X)
 
     Y = []
-    with open(target_path, "r", newline = "\n") as csvfile:
+    with open(ground_truth_path, "r", newline = "\n") as csvfile:
         reader = csv.DictReader(csvfile, delimiter = ";")
         for row in reader:
             y = row["Ids"]

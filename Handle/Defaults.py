@@ -33,3 +33,4 @@ CSV_FILENAME = lambda channel: f"{CSV_FILENAME_TEMPLATE}{channel}.csv"
 DUMPFILE = config_defaults["dumpfile"]
 TRAIN_DATASET_SIZE = float(config_defaults["train_dataset_size"])
 STRIP_FREQUENCY = float(config_defaults["strip_frequency"])
+OUTPUT_THRESHOLD = float(config_defaults["output_threshold"])

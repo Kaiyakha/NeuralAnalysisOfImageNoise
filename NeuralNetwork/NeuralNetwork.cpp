@@ -82,9 +82,6 @@ void NeuralNetwork::inspect(void) const noexcept {
 
 
 const VectorXd& NeuralNetwork::forwardprop(const VectorXd& X) {
-	// activations[0](0, X.size()) = X(0, shape[0]);
-	assert(X.size() == activations[0].size());
-
 	activations[0] = X;
 	for (unsigned l = 0; l < layers - 1; l++) {
 		// Eigen matrix multiplication requires optimization
@@ -119,6 +116,8 @@ unsigned NeuralNetwork::total_epochs = 0;
 void NeuralNetwork::init_train(MatrixXd *input, MatrixXd *target, const py::dict& config) {
 	this->input = input;
 	this->target = target;
+	if (input->cols() != shape[0] || target->cols() != shape[layers - 1])
+		throw std::runtime_error("Vector size does not fit the network shape");
 
 	epochs = py::int_(py::float_(config["epochs"]));
 	test_freq = py::int_(py::float_(config["test_frequency"]));
@@ -152,6 +151,9 @@ const float NeuralNetwork::test(const MatrixXd *input, const MatrixXd *target) {
 	VectorXd network_output;
 	VectorXi real_output_indices, expected_output_indices;
 	float accuracy;
+
+	if (input->cols() != shape[0] || target->cols() != shape[layers - 1])
+		throw std::runtime_error("Vector size does not fit the network shape");
 
 	for (Index i = 0; i < input->rows(); i++) {
 		network_output = forwardprop(input->row(i));

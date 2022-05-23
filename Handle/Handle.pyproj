@@ -4,7 +4,8 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>ca26fe21-0e18-4129-a654-bcc838ae29cb</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>Train.py</StartupFile>
+    <StartupFile>
+    </StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -36,8 +37,6 @@
     <Compile Include="Defaults.py" />
     <Compile Include="GetData.py" />
     <Compile Include="HandleConfig.py" />
-    <Compile Include="Test.py" />
-    <Compile Include="Train.py" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="config.ini" />
