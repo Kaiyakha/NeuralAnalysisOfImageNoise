@@ -30,7 +30,7 @@ def feedforward(
 	filename: str = typer.Argument(..., help = "Name of the file of interest"),
 	threshold: float = typer.Option(Defaults.OUTPUT_THRESHOLD, "-t", "--threshold", help = "Minimum value on the output neuron to consider the answer positive")
 ):
-	if not 0 < threshold <= 1: raise ValueError("Threshold must be in range (0, 1]")
+	if not 0 < threshold < 1: raise ValueError("Threshold must be in range (0, 1)")
 
 	img, img_vector = getVector(path, filename)
 	network = nn.NeuralNetwork(dumpfile)
@@ -74,7 +74,7 @@ def train(
 	train_time = round(time.time() - train_time)
 	m, s = divmod(train_time, 60)
 	h, m = divmod(m, 60)
-	print(f"\nTime taken: {str(h).zfill(2)}:{str(m).zfill(2)}:{str(s).zfill(2)}")
+	print(f"\nSession time: {str(h).zfill(2)}:{str(m).zfill(2)}:{str(s).zfill(2)}")
 
 	if dump: network.dump(dumpfile)
 

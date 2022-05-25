@@ -48,7 +48,7 @@ def corrupt(input_path: str, output_path: str, channel: str, csv_filename: str, 
 			echo(f"\rCorrupting images... {percent}%\33[0K", nl = False)
 
 	# The ordinary number of each strip in each image gets stored into a file
-	# The data is used as target data for a neural network
+	# The data is used as ground truth for a neural network
 	with open(csv_file_path, "w", newline = "\n") as csvfile:
 		fields = "Image", "Ids"
 		writer = csv.DictWriter(csvfile, fieldnames = fields, delimiter = ";")
@@ -72,7 +72,8 @@ def _makeDir(path: str):
 
 			if prompt == "y":
 				for item in items:
-					os.remove(path + item)
+					try: os.remove(path + item)
+					except PermissionError: continue
 					percent = round(items.index(item) / len(items) * 100)
 					echo(f"\rClearing... {percent}%\33[0K", nl = False)
 			else:

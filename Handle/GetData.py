@@ -15,7 +15,8 @@ def getVector(path: str, filename: str):
 def getDataset(input_path: str, ground_truth_path: str):
     X = []
     for file in os.listdir(input_path):
-        img, img_vector = getVector(input_path, file)
+        try: img, img_vector = getVector(input_path, file)
+        except PermissionError: continue
         img.close()
         X.append(img_vector)
     X = np.array(X)
