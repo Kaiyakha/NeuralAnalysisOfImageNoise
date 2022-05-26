@@ -1,11 +1,13 @@
 # Create artificial noise on each image
-# The resulting images are in the R channel
-# But other channels can also be chosen
+# The resulting images are in the chosen channel
 
 import os, random
 import csv
+from numpy import array
 from typer import echo
 from PIL import Image
+
+MAX_PIX_VAL = 255
 
 
 def crop(input_file: str, output_path: str, patch_size: tuple):
@@ -81,15 +83,18 @@ def _makeDir(path: str):
 				exit(0)
 
 
-def _makeNoise(img, strip_freq: float):
+def _makeNoise(img, strip_freq: float, min_shift: int = 0):
 	imgMatrix = img.load()
 	strip_ids = []
 
 	for i in range(img.width):
 		if random.random() < strip_freq:
-			maxPix = max([imgMatrix[i, j] for j in range(img.height)])
-			a = random.uniform(0, 255 / maxPix if maxPix else 0)
-			b = random.randrange(0, 255 - int(a * maxPix))
+			column = array([imgMatrix[i, j] for j in range(img.height)])
+			maxPix = column.max(); minPix = column.min()
+			a = random.uniform(0, (MAX_PIX_VAL / maxPix) if maxPix else 0)
+			if 0 < a < 1 and int(a * minPix) >= min_shift: b = random.randint(int(-a * minPix), -min_shift)
+			elif a * maxPix <= MAX_PIX_VAL - min_shift: b = random.randint(min_shift, MAX_PIX_VAL - int(a * maxPix))
+			else: continue
 			for j in range(img.height): imgMatrix[i, j] = int(a * imgMatrix[i, j] + b)
 			strip_ids.append(str(i))
 
