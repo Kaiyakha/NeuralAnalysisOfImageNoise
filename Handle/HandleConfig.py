@@ -39,7 +39,12 @@ def getConfigTrain(config_file: str) -> dict:
 def getConfigDefaults(config_file: str) -> dict:
     config = _getConfig(config_file)
 
-    config_defaults = dict(config.items("meta") + config.items("image_resolution") + config.items("default_path") + config.items("defaults"))
+    config_defaults = dict(config.items("meta") \
+                           + config.items("image_resolution") \
+                           + config.items("corruption") \
+                           + config.items("default_path") \
+                           + config.items("defaults") \
+                           )
     config_defaults["relative"] = True if config_defaults["relative"].lower() == "true" else False
 
     return config_defaults

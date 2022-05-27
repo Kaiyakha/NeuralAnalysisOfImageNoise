@@ -110,12 +110,14 @@ def corrupt(
 	output_path: str = typer.Option(Defaults.DATASET, "-o", "--output-path", help = "Path to store the output to"),
 	channel: str = typer.Argument(..., help = "A channel from the RGB range to provide the result"),
 	csv_filename_template: str = typer.Option(Defaults.CSV_FILENAME_TEMPLATE, "-f", "--csv-filename", help = "CSV filename template"),
-	strip_freq: float = typer.Option(Defaults.STRIP_FREQUENCY, "-sf", "--strip-freq", help = "Corruption probability for a single strip")
+	strip_freq: float = typer.Option(Defaults.STRIP_FREQUENCY, "-sf", "--strip-freq", help = "Corruption probability for a single strip"),
+	min_shift: int = typer.Option(Defaults.MIN_SHIFT, "-d", "--min-deviation", help = "Minimal deviation of a corrupted strip")
 ):
 	if channel not in Defaults._IMAGERY_RANGE: raise ValueError("Channel must be R, G or B")
 	if not 0 < strip_freq < 1: raise ValueError("Corruption probability must be in range (0, 1)")
+	if not 0 <= min_shift <= Defaults._MAX_PIX_VAL: raise ValueError(f"Minimal deviation must be in range [0, {Defaults._MAX_PIX_VAL}]")
 	csv_filename = Defaults.CSV_FILENAME(channel)
-	Imagery.corrupt(input_path, output_path, channel, csv_filename, strip_freq)
+	Imagery.corrupt(input_path, output_path, channel, csv_filename, strip_freq, min_shift)
 
 
 if __name__ == "__main__":
