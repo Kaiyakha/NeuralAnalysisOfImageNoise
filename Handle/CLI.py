@@ -23,6 +23,14 @@ def init_network(
 	network.dump(dumpfile)
 
 
+@app.command(help = "Show network configuration")
+def inspect(
+	dumpfile: str = typer.Option(Defaults.DUMPFILE, "-d", "--dumpfile", help = "A binary file to load the configuration from")
+):
+	network = nn.NeuralNetwork(dumpfile)
+	network.inspect()
+
+
 @app.command("feed", help = "Get the output for a given input")
 def feedforward(
 	dumpfile: str = typer.Option(Defaults.DUMPFILE, "-d", "--dumpfile", help = "A binary file to load the configuration"),
@@ -100,7 +108,7 @@ def crop(
 	output_path: str = typer.Option(Defaults.PATCHES, "-o", "--output-path", help = "Output path"),
 	patch_size: str = typer.Option(Defaults.PATCH_SIZE, "-s", "--patch-size", help = f"Size of each patch, values must be separated with {Defaults._CLI_SPLITTER}")
 ):
-	patch_size = tuple([int(value) for value in patch_size.split(Defaults._CLI_SPLITTER)])
+	patch_size = [int(value) for value in patch_size.split(Defaults._CLI_SPLITTER)]
 	Imagery.crop(input_file, output_path, patch_size)
 
 

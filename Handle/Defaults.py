@@ -11,9 +11,12 @@ config_defaults = getConfigDefaults(_CONFIG_FILE)
 
 STRIP_FREQUENCY = float(config_defaults["strip_frequency"])
 MIN_SHIFT = int(config_defaults["min_deviation"])
+BRIGHTER = True if config_defaults["brighter"].lower() == "true" else False
+DARKER = True if config_defaults["darker"].lower() == "true" else False
 
 
-ITEMS_PATH = os.path.dirname(__file__).replace("\\", "/") if config_defaults["relative"] else ""
+relative_path = True if config_defaults["relative"].lower() == "true" else False
+ITEMS_PATH = os.path.dirname(__file__).replace("\\", "/") if relative_path else ""
 
 ITEMS_PATH += config_defaults["items_path"]
 if not ITEMS_PATH.endswith('/'): ITEMS_PATH += '/'

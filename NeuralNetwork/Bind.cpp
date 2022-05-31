@@ -8,7 +8,7 @@ static void launch_train(NeuralNetwork& network, MatrixXd* input, MatrixXd* targ
 		network.train_in_parallel_with_averaging(threads);
 	}
 	else network.train();
-	network.total_epochs += py::int_(py::float_(config["epochs"]));
+	network.total_epochs += py::int_(config["epochs"]);
 }
 
 
@@ -16,7 +16,7 @@ PYBIND11_MODULE(NeuralNetwork, mod) {
 	py::class_<NeuralNetwork>(mod, "NeuralNetwork")
 		.def(py::init<const py::dict&>())
 		.def(py::init<const std::string&>())
-		.def("_inspect", &NeuralNetwork::inspect)
+		.def("inspect", &NeuralNetwork::inspect)
 		.def("__call__", [](NeuralNetwork& network, const VectorXd& X) { return network.forwardprop(X); })
 		.def("train", &launch_train)
 		.def("test", &NeuralNetwork::test)

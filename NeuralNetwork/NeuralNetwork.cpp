@@ -3,7 +3,7 @@
 
 
 NeuralNetwork::NeuralNetwork(const py::dict& config) {
-	const py::list shape = config["shape_modifiers"];
+	const py::list shape = config["shape"];
 	layers = py::len(shape);
 	allocate_memory();
 
@@ -59,12 +59,12 @@ void NeuralNetwork::set_activation_functions() {
 
 void NeuralNetwork::inspect(void) const noexcept {
 	using namespace std;
-	cout << "=============NeuralNetwork===============\n";
+//	cout << "=============NeuralNetwork===============\n";
 	size_t l;
 
-	cout << "\nShape:";
+	cout << "Shape:";
 	for (l = 0; l < layers; l++) cout << " " << shape[l];
-
+/*
 	cout << "\n\nWeights:\n";
 	cout << "----------------------------------\n";
 	for (l = 0; l < layers - 1; l++) {
@@ -78,6 +78,15 @@ void NeuralNetwork::inspect(void) const noexcept {
 		cout << activations[l].transpose() << '\n';
 	}
 	cout << "----------------------------------" << endl;
+*/
+	cout << "\nActivation functions:";
+	for (auto function : function_names) cout << " " << static_cast<string>(py::str(function));
+
+	cout << "\nActivation function parameters:";
+	for (l = 0; l < layers - 1; l++) cout << " " << func_params[l];
+
+	cout << "\nTotal epochs: ";
+	cout << total_epochs;
 }
 
 
@@ -119,13 +128,13 @@ void NeuralNetwork::init_train(MatrixXd *input, MatrixXd *target, const py::dict
 	if (input->cols() != shape[0] || target->cols() != shape[layers - 1])
 		throw std::runtime_error("Vector size does not fit the network shape");
 
-	epochs = py::int_(py::float_(config["epochs"]));
-	test_freq = py::int_(py::float_(config["test_frequency"]));
+	epochs = py::int_(config["epochs"]);
+	test_freq = py::int_(config["test_frequency"]);
 	lr = py::float_(config["rate"]);
 
 	if (py::bool_(config["dynamic_rate"])){
 		delta_lr = py::float_(config["rate_delta"]);
-		accuracy_stuck_limit = py::int_(py::float_(config["accuracy_stuck_limit"]));
+		accuracy_stuck_limit = py::int_(config["accuracy_stuck_limit"]);
 		delta_accuracy_stuck_limit = py::int_(config["accuracy_stuck_limit_delta"]);
 	}
 
@@ -159,13 +168,13 @@ const float NeuralNetwork::test(const MatrixXd *input, const MatrixXd *target) {
 		network_output = forwardprop(input->row(i));
 		ones = target->row(i).count();
 		expected_predictions += ones;
-		real_output_indices = argsort(network_output)(seqN(0, ones));
-		expected_output_indices = argsort(target->row(i))(seqN(0, ones));
+		real_output_indices = argsort(network_output, ones);
+		expected_output_indices = argsort(target->row(i), ones);
 		if (ones) correct_predictions += intersect1d_len(real_output_indices, expected_output_indices);
 	}
 
-	accuracy = (float)correct_predictions / (float)expected_predictions * 100;
-	accuracy = std::round(accuracy * 100) / 100;
+	accuracy = static_cast<float>(correct_predictions) / static_cast<float>(expected_predictions);
+	accuracy = std::round(accuracy * 1e4f) / 100;
 	return accuracy;
 }
 

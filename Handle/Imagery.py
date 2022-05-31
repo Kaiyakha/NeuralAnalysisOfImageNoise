@@ -83,6 +83,12 @@ def _makeDir(path: str):
 				exit(0)
 
 
+def _adjust_min_shift(a, pixVal, shiftVal):
+	shiftVal -= abs(a * pixVal - pixVal)
+	if shiftVal < 0: shiftVal = 0
+	return int(shiftVal)
+
+
 def _makeNoise(img, strip_freq: float, min_shift: int):
 	imgMatrix = img.load()
 	strip_ids = []
@@ -92,9 +98,12 @@ def _makeNoise(img, strip_freq: float, min_shift: int):
 			column = array([imgMatrix[i, j] for j in range(img.height)])
 			maxPix = column.max(); minPix = column.min()
 			a = random.uniform(0, (_MAX_PIX_VAL / maxPix) if maxPix else 0)
-			if 0 < a < 1 and int(a * minPix) >= min_shift: b = random.randint(int(-a * minPix), -min_shift)
-			elif a * maxPix <= _MAX_PIX_VAL - min_shift: b = random.randint(min_shift, _MAX_PIX_VAL - int(a * maxPix))
-			else: continue
+			#if a * maxPix <= _MAX_PIX_VAL - min_shift:
+			#	b = random.randint(_adjust_min_shift(a, maxPix, min_shift), _MAX_PIX_VAL - int(a * maxPix))
+			# elif 0 < a < 1 and int(a * minPix) >= min_shift:
+			# 	b = random.randint(int(-a * minPix), -_adjust_min_shift(a, minPix, min_shift))			
+			#else: continue
+			b = random.randint(-int(a * minPix), _MAX_PIX_VAL - int(a * maxPix))
 			for j in range(img.height): imgMatrix[i, j] = int(a * imgMatrix[i, j] + b)
 			strip_ids.append(str(i))
 

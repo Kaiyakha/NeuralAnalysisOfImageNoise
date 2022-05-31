@@ -39,10 +39,10 @@ const VectorXd ReLU_der(const VectorXd& X, const double angle) {
 	return result;
 }
 
-const VectorXi argsort(VectorXd X) {
-	VectorXi indices = VectorXi::Zero(X.size());
+const VectorXi argsort(VectorXd X, const Index count) {
+	VectorXi indices = VectorXi::Zero(count);
 	int max_ind;
-	for (int i = 0; i < X.size(); i++) {
+	for (Index i = 0; i < count; i++) {
 		X.maxCoeff(&max_ind);
 		X(max_ind) = -DBL_MAX;
 		indices(i) = max_ind;
@@ -51,9 +51,8 @@ const VectorXi argsort(VectorXd X) {
 }
 
 const Index intersect1d_len(VectorXi X, VectorXi Y) {
-	int intersection_len = 0;
 	std::vector<int> intersection;
-	X.reverseInPlace(); Y.reverseInPlace();
+	std::sort(X.begin(), X.end()); std::sort(Y.begin(), Y.end());
 	std::set_intersection(X.data(), X.data() + X.size(), Y.data(), Y.data() + Y.size(), std::back_inserter(intersection));
-	return intersection.size();
+	return static_cast<Index>(intersection.size());
 }

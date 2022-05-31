@@ -73,7 +73,7 @@ const VectorXd ReLU_der(const VectorXd& X, const double angle);
 function_ get_function_by_name(const std::string& name);
 function_ get_function_der_by_name(const std::string& name);
 
-const VectorXi argsort(VectorXd X);
+const VectorXi argsort(VectorXd X, const Index count);
 const Index intersect1d_len(VectorXi X, VectorXi Y);
 
 const std::string get_terminator(void) noexcept;
