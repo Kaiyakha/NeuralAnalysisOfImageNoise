@@ -53,12 +53,17 @@ def getConfigTrain(config_file: str) -> dict:
 	return config_train
 
 
+def getConfigCorrupt(config_file: str) -> dict:
+	config = _getConfig(config_file)
+	config_corrupt = dict(config.items("corruption"))
+	return config_corrupt
+
+
 def getConfigDefaults(config_file: str) -> dict:
 	config = _getConfig(config_file)
 
 	config_defaults = dict(config.items("meta") \
 						   + config.items("image_resolution") \
-						   + config.items("corruption") \
 						   + config.items("default_path") \
 						   + config.items("defaults") \
 						   )

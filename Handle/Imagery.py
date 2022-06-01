@@ -7,7 +7,7 @@ from numpy import array
 from typer import echo
 from PIL import Image
 
-from Defaults import _MAX_PIX_VAL
+from Defaults import _MAX_PIX_VAL, _SHIFT_DIRECTION_OPTIONS, _IMAGERY_RANGE
 
 
 def crop(input_file: str, output_path: str, patch_size: tuple):
@@ -28,18 +28,26 @@ def crop(input_file: str, output_path: str, patch_size: tuple):
 	scene.close()
 
 
-def corrupt(input_path: str, output_path: str, channel: str, csv_filename: str, strip_freq: float, min_shift: int):
+def corrupt(input_path: str, output_path: str, channel: str, csv_filename: str, config: dict):
+	if channel not in _IMAGERY_RANGE: raise ValueError(f"Channel must be in range {_IMAGERY_RANGE}")
+	strip_freq = float(config["strip_frequency"])
+	if not 0 < strip_freq < 1: raise ValueError("Corruption probability must be in range (0, 1)")
+	min_shift = int(config["min_shift"])
+	if not 0 <= min_shift <= _MAX_PIX_VAL: raise ValueError(f"Minimal deviation must be in range [0, {_MAX_PIX_VAL}]")
+	shift_direction = config["shift_direction"]
+	if shift_direction not in _SHIFT_DIRECTION_OPTIONS: raise ValueError(f"Shift direction must be in {_SHIFT_DIRECTION_OPTIONS}")
+
 	images = os.listdir(input_path)
 	corrupted_image_path = output_path + channel + '/'
 	csv_file_path = output_path + csv_filename
-	channel = "RGB".index(channel)
+	channel = _IMAGERY_RANGE.index(channel)
 	_makeDir(corrupted_image_path)
 
 	Y = []
 	for file in images:
 		patch = Image.open(input_path + file)
-		patch = patch.convert("RGB").split()[channel]
-		strip_ids = _makeNoise(patch, strip_freq, min_shift)
+		patch = patch.convert(_IMAGERY_RANGE).split()[channel]
+		strip_ids = _makeNoise(patch, strip_freq, min_shift, shift_direction)
 		Y.append(strip_ids)
 		patch.save(corrupted_image_path + file, 'bmp')
 		patch.close()
@@ -55,7 +63,7 @@ def corrupt(input_path: str, output_path: str, channel: str, csv_filename: str, 
 		fields = "Image", "Ids"
 		writer = csv.DictWriter(csvfile, fieldnames = fields, delimiter = ";")
 		writer.writeheader()
-		for i in range(len(Y)):
+		for i, _ in enumerate(Y):
 			writer.writerow({"Image": images[i], "Ids": Y[i]})
 			if i % 100 == 0:
 				percent = round(i / len(Y) * 100)
@@ -81,15 +89,9 @@ def _makeDir(path: str):
 			else:
 				echo("Aborted!")
 				exit(0)
+				
 
-
-def _adjust_min_shift(a, pixVal, shiftVal):
-	shiftVal -= abs(a * pixVal - pixVal)
-	if shiftVal < 0: shiftVal = 0
-	return int(shiftVal)
-
-
-def _makeNoise(img, strip_freq: float, min_shift: int):
+def _makeNoise(img, strip_freq: float, min_shift: int, shift_direction: str):
 	imgMatrix = img.load()
 	strip_ids = []
 
@@ -97,13 +99,13 @@ def _makeNoise(img, strip_freq: float, min_shift: int):
 		if random.random() < strip_freq:
 			column = array([imgMatrix[i, j] for j in range(img.height)])
 			maxPix = column.max(); minPix = column.min()
-			a = random.uniform(0, (_MAX_PIX_VAL / maxPix) if maxPix else 0)
-			#if a * maxPix <= _MAX_PIX_VAL - min_shift:
-			#	b = random.randint(_adjust_min_shift(a, maxPix, min_shift), _MAX_PIX_VAL - int(a * maxPix))
-			# elif 0 < a < 1 and int(a * minPix) >= min_shift:
-			# 	b = random.randint(int(-a * minPix), -_adjust_min_shift(a, minPix, min_shift))			
-			#else: continue
-			b = random.randint(-int(a * minPix), _MAX_PIX_VAL - int(a * maxPix))
+
+			a = random.uniform(0 if shift_direction != "brighter" else 1, \
+							  ((_MAX_PIX_VAL / maxPix) if (maxPix and shift_direction != "darker") else 1))
+			b = random.randint(-int(a * minPix) if shift_direction != "brighter" else 0, \
+							   (_MAX_PIX_VAL - int(a * maxPix)) if shift_direction != "darker" else 0)
+			if any(abs(column - (a * column + b)) < min_shift): continue
+
 			for j in range(img.height): imgMatrix[i, j] = int(a * imgMatrix[i, j] + b)
 			strip_ids.append(str(i))
 

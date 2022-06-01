@@ -5,7 +5,7 @@ from numpy import argwhere
 sys.path.append("../NeuralNetwork/x64/Debug")
 
 import NeuralNetwork as nn
-from HandleConfig import getConfigInit, getConfigTrain
+from HandleConfig import getConfigInit, getConfigTrain, getConfigCorrupt
 import Imagery
 from GetData import getDataset, getVector
 import Defaults
@@ -36,7 +36,8 @@ def feedforward(
 	dumpfile: str = typer.Option(Defaults.DUMPFILE, "-d", "--dumpfile", help = "A binary file to load the configuration"),
 	path: str = typer.Option(Defaults.DATASET + Defaults.CHANNEL + '/', "-p", "--path", help = "Path to data"),
 	filename: str = typer.Argument(..., help = "Name of the file of interest"),
-	threshold: float = typer.Option(Defaults.OUTPUT_THRESHOLD, "-t", "--threshold", help = "Minimum value on the output neuron to consider the answer positive")
+	threshold: float = typer.Option(Defaults.OUTPUT_THRESHOLD, "-t", "--threshold", \
+									help = "Minimum value on the output neuron to consider the answer positive")
 ):
 	if not 0 < threshold < 1: raise ValueError("Threshold must be in range (0, 1)")
 
@@ -52,13 +53,17 @@ def feedforward(
 
 def _getModel(dumpfile, data_path, channel, reverse_dataset, dataset_size):
 	if channel not in Defaults._IMAGERY_RANGE: raise ValueError("Channel must be R, G or B")
+
 	input_data = data_path + channel + '/'
 	ground_truth = data_path + Defaults.CSV_FILENAME(channel)
 	X, Y = getDataset(input_data, ground_truth)
+
 	if reverse_dataset: X = X[::-1]; Y = Y[::-1]
 	if not 0 < dataset_size <= 1: raise ValueError("dataset_size must be in the interval (0, 1]")
+
 	dataset_size = int(X.shape[0] * dataset_size)
 	network = nn.NeuralNetwork(dumpfile)
+
 	return network, X[:dataset_size], Y[:dataset_size]
 
 
@@ -67,7 +72,8 @@ def train(
 	data_path: str = typer.Option(Defaults.DATASET, "-p", "--data-path", help = "Data for training"),
 	channel: str = typer.Option(Defaults.CHANNEL, "-ch", "--channel", help = f"A channel from the {Defaults._IMAGERY_RANGE} range"),
 	reverse_dataset: bool = typer.Option(False, "-r", "--reverse-dataset", help = "Invert the order of the elements in the dataset"),
-	dataset_size: float = typer.Option(Defaults.TRAIN_DATASET_SIZE, "-s", "--dataset-size", help = "Multiply the size of the dataset by the value"),
+	dataset_size: float = typer.Option(Defaults.TRAIN_DATASET_SIZE, "-s", "--dataset-size", \
+									   help = "Multiply the size of the dataset by the value"),
 	config_file: str = typer.Option(Defaults._CONFIG_FILE, "-c", "--config-file", help = "Configuration file"),
 	dumpfile: str = typer.Option(Defaults.DUMPFILE, "-d", "--dumpfile", help = "A binary file to store and load the configuration"),
 	dump: bool = typer.Option(True, "--no-dump", help = "Do not dump the configuration", show_default = False)
@@ -91,8 +97,10 @@ def train(
 def test(
 	data_path: str = typer.Option(Defaults.DATASET, "-p", "--data-path", help = "Data for testing"),
 	channel: str = typer.Option(Defaults.CHANNEL, "-ch", "--channel", help = f"A channel from the {Defaults._IMAGERY_RANGE} range"),
-	reverse_dataset: bool = typer.Option(True, "-nr", "--no-reverse-dataset", show_default = False, help = "Do not invert the order of the elements in the dataset"),
-	dataset_size: float = typer.Option(round(1 - Defaults.TRAIN_DATASET_SIZE, 2), "-s", "--dataset-size", help = "Multiply the size of the dataset by the value"),
+	reverse_dataset: bool = typer.Option(True, "-nr", "--no-reverse-dataset", show_default = False, \
+										 help = "Do not invert the order of the elements in the dataset"),
+	dataset_size: float = typer.Option(round(1 - Defaults.TRAIN_DATASET_SIZE, 2), "-s", "--dataset-size", \
+									   help = "Multiply the size of the dataset by the value"),
 	dumpfile: str = typer.Option(Defaults.DUMPFILE, "-d", "--dumpfile", help = "A binary file to load the configuration")
 ):
 	typer.echo("Initialising...", nl = False)
@@ -106,7 +114,8 @@ def test(
 def crop(
 	input_file: str = typer.Option(Defaults.IMAGE_FILE, "-i", "--input-path", help = "Path to an image to crop"),
 	output_path: str = typer.Option(Defaults.PATCHES, "-o", "--output-path", help = "Output path"),
-	patch_size: str = typer.Option(Defaults.PATCH_SIZE, "-s", "--patch-size", help = f"Size of each patch, values must be separated with {Defaults._CLI_SPLITTER}")
+	patch_size: str = typer.Option(Defaults.PATCH_SIZE, "-s", "--patch-size", \
+								   help = f"Size of each patch, values must be separated with {Defaults._CLI_SPLITTER}")
 ):
 	patch_size = [int(value) for value in patch_size.split(Defaults._CLI_SPLITTER)]
 	Imagery.crop(input_file, output_path, patch_size)
@@ -118,14 +127,11 @@ def corrupt(
 	output_path: str = typer.Option(Defaults.DATASET, "-o", "--output-path", help = "Path to store the output to"),
 	channel: str = typer.Argument(..., help = "A channel from the RGB range to provide the result"),
 	csv_filename_template: str = typer.Option(Defaults.CSV_FILENAME_TEMPLATE, "-f", "--csv-filename", help = "CSV filename template"),
-	strip_freq: float = typer.Option(Defaults.STRIP_FREQUENCY, "-sf", "--strip-freq", help = "Corruption probability for a single strip"),
-	min_shift: int = typer.Option(Defaults.MIN_SHIFT, "-d", "--min-deviation", help = "Minimal deviation of a corrupted strip")
+	config_file: str = typer.Option(Defaults._CONFIG_FILE, "-c", "--config-file", help = "Configuration file")
 ):
-	if channel not in Defaults._IMAGERY_RANGE: raise ValueError("Channel must be R, G or B")
-	if not 0 < strip_freq < 1: raise ValueError("Corruption probability must be in range (0, 1)")
-	if not 0 <= min_shift <= Defaults._MAX_PIX_VAL: raise ValueError(f"Minimal deviation must be in range [0, {Defaults._MAX_PIX_VAL}]")
 	csv_filename = Defaults.CSV_FILENAME(channel)
-	Imagery.corrupt(input_path, output_path, channel, csv_filename, strip_freq, min_shift)
+	config_corrupt = getConfigCorrupt(config_file)
+	Imagery.corrupt(input_path, output_path, channel, csv_filename, config_corrupt)
 
 
 if __name__ == "__main__":

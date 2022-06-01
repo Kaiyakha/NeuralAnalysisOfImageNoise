@@ -4,15 +4,10 @@ from HandleConfig import getConfigDefaults
 _CONFIG_FILE = "config.ini"
 _IMAGERY_RANGE = "RGB"
 _MAX_PIX_VAL = 255
+_SHIFT_DIRECTION_OPTIONS = "darker", "brighter", "any"
 _CLI_SPLITTER = "*"
 
 config_defaults = getConfigDefaults(_CONFIG_FILE)
-
-
-STRIP_FREQUENCY = float(config_defaults["strip_frequency"])
-MIN_SHIFT = int(config_defaults["min_deviation"])
-BRIGHTER = True if config_defaults["brighter"].lower() == "true" else False
-DARKER = True if config_defaults["darker"].lower() == "true" else False
 
 
 relative_path = True if config_defaults["relative"].lower() == "true" else False
