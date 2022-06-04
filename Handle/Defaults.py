@@ -11,8 +11,11 @@ config_defaults = getConfigDefaults(_CONFIG_FILE)
 
 
 relative_path = True if config_defaults["relative"].lower() == "true" else False
-ITEMS_PATH = os.path.dirname(__file__).replace("\\", "/") if relative_path else ""
 
+NETWORK_PATH = os.path.dirname(__file__).replace("\\", "/") if relative_path else ""
+NETWORK_PATH += config_defaults["network_path"]
+
+ITEMS_PATH = os.path.dirname(__file__).replace("\\", "/") if relative_path else ""
 ITEMS_PATH += config_defaults["items_path"]
 if not ITEMS_PATH.endswith('/'): ITEMS_PATH += '/'
 
