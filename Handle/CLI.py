@@ -1,4 +1,4 @@
-import sys, time
+import time
 import typer
 from numpy import argwhere
 
@@ -7,8 +7,8 @@ import Imagery
 from GetData import getDataset, getVector
 import Defaults
 
-sys.path.append(Defaults.NETWORK_PATH)
 import NeuralNetwork as nn
+
 
 app = typer.Typer(help = "CLI for a fully connected feedforward neural network")
 
