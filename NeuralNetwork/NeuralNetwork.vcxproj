@@ -122,7 +122,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>D:\Program Files\Microsoft Visual Studio\Shared\Python39_64\Include;C:\Users\folom\AppData\Roaming\Python\Python39\site-packages\pybind11\include;D:\Program Files\Microsoft Visual Studio\ThirdParty\eigen-3.4.0</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\Program Files\Microsoft Visual Studio\Shared\Python38_64\Include;D:\Program Files\Microsoft Visual Studio\Shared\Python38_64\lib\site-packages\pybind11\include;D:\Program Files\Microsoft Visual Studio\ThirdParty\eigen-3.4.0</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <MultiProcessorCompilation>false</MultiProcessorCompilation>
       <Optimization>MaxSpeed</Optimization>
@@ -135,7 +135,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>D:\Program Files\Microsoft Visual Studio\Shared\Python39_64\libs</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>D:\Program Files\Microsoft Visual Studio\Shared\Python38_64\libs</AdditionalLibraryDirectories>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
     </Link>
   </ItemDefinitionGroup>
@@ -147,7 +147,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>D:\Program Files\Microsoft Visual Studio\Shared\Python39_64\Include;C:\Users\folom\AppData\Roaming\Python\Python39\site-packages\pybind11\include;D:\Program Files\Microsoft Visual Studio\ThirdParty\eigen-3.4.0</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\Program Files\Microsoft Visual Studio\Shared\Python38_64\Include;D:\Program Files\Microsoft Visual Studio\Shared\Python38_64\lib\site-packages\pybind11\include;D:\Program Files\Microsoft Visual Studio\ThirdParty\eigen-3.4.0</AdditionalIncludeDirectories>
       <DebugInformationFormat>None</DebugInformationFormat>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -158,7 +158,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>D:\Program Files\Microsoft Visual Studio\Shared\Python39_64\libs</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>D:\Program Files\Microsoft Visual Studio\Shared\Python38_64\libs</AdditionalLibraryDirectories>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
     </Link>
   </ItemDefinitionGroup>
