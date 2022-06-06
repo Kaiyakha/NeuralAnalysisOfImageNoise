@@ -15,12 +15,12 @@ config_defaults = getConfigDefaults(_CONFIG_FILE)
 relative_path = True if config_defaults["relative"].lower() == "true" else False
 
 try:
-    _NETWORK_PATH = os.path.dirname(__file__).replace("\\", "/") if relative_path else ""
+    _NETWORK_PATH = os.path.dirname(__file__).replace("\\", "/") + '/' if relative_path else ""
     _NETWORK_PATH += config_defaults["network_path"]
     sys.path.append(_NETWORK_PATH)
 except KeyError: pass
 
-ITEMS_PATH = os.path.dirname(__file__).replace("\\", "/") if relative_path else ""
+ITEMS_PATH = os.path.dirname(__file__).replace("\\", "/") + '/' if relative_path else ""
 ITEMS_PATH += config_defaults["items_path"]
 if not ITEMS_PATH.endswith('/'): ITEMS_PATH += '/'
 

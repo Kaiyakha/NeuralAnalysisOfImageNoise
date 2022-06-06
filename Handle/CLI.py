@@ -20,6 +20,7 @@ def init_network(
 	config_init = getConfigInit(config_file)
 	network = nn.NeuralNetwork(config_init)
 	network.dump(dumpfile)
+	typer.echo("A new neural network has been initialised.\33[0K", nl = False)
 
 
 @app.command(help = "Show network configuration")
