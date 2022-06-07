@@ -23,7 +23,7 @@ def crop(input_file: str, output_path: str, patch_size: tuple):
 			patch.close()
 		percent = round(i / (scene.width - width) * 100)
 		echo(f"\rCropping... {percent}%\33[0K", nl = False)
-	echo(f"\rThe image has been successfully cropped.\33[0K", nl = False)
+	echo(f"\rThe image has been successfully cropped.\33[0K")
 
 	scene.close()
 
@@ -68,7 +68,7 @@ def corrupt(input_path: str, output_path: str, channel: str, csv_filename: str, 
 			if i % 100 == 0:
 				percent = round(i / len(Y) * 100)
 				echo (f"\rComprising data... {percent}%\33[0K", nl = False)
-	echo(f"\rThe pathces have been successfully corrupted.\33[0K", nl = False)
+	echo(f"\rThe patches have been successfully corrupted.\33[0K")
 
 
 def _makeDir(path: str):

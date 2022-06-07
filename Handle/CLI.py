@@ -20,7 +20,7 @@ def init_network(
 	config_init = getConfigInit(config_file)
 	network = nn.NeuralNetwork(config_init)
 	network.dump(dumpfile)
-	typer.echo("A new neural network has been initialised.\33[0K", nl = False)
+	typer.echo("A new neural network has been initialised.")
 
 
 @app.command(help = "Show network configuration")
@@ -37,7 +37,8 @@ def feedforward(
 	path: str = typer.Option(Defaults.DATASET + Defaults.CHANNEL + '/', "-p", "--path", help = "Path to data"),
 	filename: str = typer.Argument(..., help = "Name of the file of interest"),
 	threshold: float = typer.Option(Defaults.OUTPUT_THRESHOLD, "-t", "--threshold", \
-									help = "Minimum value on the output neuron to consider the answer positive")
+									help = "Minimum value on the output neuron to consider the answer positive"),
+	show_image: bool = typer.Option(False, "-s", "--show-image", help = "Open the input image")
 ):
 	if not 0 < threshold < 1: raise ValueError("Threshold must be in range (0, 1)")
 
@@ -47,7 +48,7 @@ def feedforward(
 	output = argwhere(output > threshold).T[0]
 
 	print(*output)
-	img.show()
+	if show_image: img.show()
 	img.close()
 
 
@@ -88,7 +89,7 @@ def train(
 	train_time = round(time.time() - train_time)
 	m, s = divmod(train_time, 60)
 	h, m = divmod(m, 60)
-	print(f"\nSession time: {str(h).zfill(2)}:{str(m).zfill(2)}:{str(s).zfill(2)}")
+	typer.echo(f"\nSession time: {str(h).zfill(2)}:{str(m).zfill(2)}:{str(s).zfill(2)}")
 
 	if dump: network.dump(dumpfile)
 

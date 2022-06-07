@@ -22,7 +22,7 @@ NeuralNetwork::NeuralNetwork(const py::dict& config) {
 
 	const py::list function_parameters = config["activation_function_parameters"];
 	if (py::len(function_parameters) != layers - 1)
-		throw std::runtime_error("Network depth does not correspond to the parameter list");
+		throw std::runtime_error("network depth does not correspond to the parameter list");
 	double parameter;
 	for (int i = 0; i < layers - 1; i++) {
 		parameter = py::float_(function_parameters[i]);
@@ -46,13 +46,13 @@ void NeuralNetwork::allocate_memory() {
 
 void NeuralNetwork::set_activation_functions() {
 	if (py::len(function_names) != layers - 1)
-		throw std::runtime_error("Network depth does not correspond to the function list");
+		throw std::runtime_error("network depth does not correspond to the function list");
 	std::string function_name;
 	for (int i = 0; i < layers - 1; i++) {
 		function_name = py::str(function_names[i]);
 		actfuncs[i] = get_function_by_name(function_name);
 		actfunc_ders[i] = get_function_der_by_name(function_name);
-		if (!actfuncs[i] || !actfunc_ders[i]) throw std::runtime_error("Invalid function name has been passed");
+		if (!actfuncs[i] || !actfunc_ders[i]) throw std::runtime_error("invalid function name has been passed");
 	}
 }
 
@@ -86,7 +86,7 @@ void NeuralNetwork::inspect(void) const noexcept {
 	for (l = 0; l < layers - 1; l++) cout << " " << func_params[l];
 
 	cout << "\nTotal epochs: ";
-	cout << total_epochs;
+	cout << total_epochs << endl;
 }
 
 
@@ -126,7 +126,7 @@ void NeuralNetwork::init_train(MatrixXd *input, MatrixXd *target, const py::dict
 	this->input = input;
 	this->target = target;
 	if (input->cols() != shape[0] || target->cols() != shape[layers - 1])
-		throw std::runtime_error("Vector size does not fit the network shape");
+		throw std::runtime_error("vector size does not fit the network shape");
 
 	epochs = py::int_(config["epochs"]);
 	test_freq = py::int_(config["test_frequency"]);
@@ -136,6 +136,7 @@ void NeuralNetwork::init_train(MatrixXd *input, MatrixXd *target, const py::dict
 		delta_lr = py::float_(config["rate_delta"]);
 		accuracy_stuck_limit = py::int_(config["accuracy_stuck_limit"]);
 		delta_accuracy_stuck_limit = py::int_(config["accuracy_stuck_limit_delta"]);
+		if (!delta_lr) throw std::runtime_error("rate_delta must be a non-zero value");
 	}
 
 	if (!py::bool_(config["parallel_training"]))
@@ -162,7 +163,7 @@ const float NeuralNetwork::test(const MatrixXd *input, const MatrixXd *target) {
 	float accuracy;
 
 	if (input->cols() != shape[0] || target->cols() != shape[layers - 1])
-		throw std::runtime_error("Vector size does not fit the network shape");
+		throw std::runtime_error("vector size does not fit the network shape");
 
 	for (Index i = 0; i < input->rows(); i++) {
 		network_output = forwardprop(input->row(i));

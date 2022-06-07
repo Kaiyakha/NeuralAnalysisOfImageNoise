@@ -14,7 +14,7 @@ NeuralNetwork::NeuralNetwork(const std::string& dumpfile) {
 
 void NeuralNetwork::dump(const std::string& filename) const {
 	std::ofstream file(filename, std::ios::binary);
-	if (!file.is_open()) throw std::exception("Failed to open a dump file");
+	if (!file.is_open()) throw std::runtime_error("failed to open a dump file");
 
 	file.write((const char*)&layers, sizeof layers);
 	file.write((const char*)shape, sizeof *shape * layers);
@@ -35,7 +35,7 @@ void NeuralNetwork::dump(const std::string& filename) const {
 
 void NeuralNetwork::load(const std::string& filename) {
 	std::ifstream file(filename, std::ios::binary);
-	if (!file.is_open()) throw std::exception("Failed to open a dump file");
+	if (!file.is_open()) throw std::runtime_error("failed to open a dump file");
 
 	file.read((char*)&layers, sizeof layers);
 	this->allocate_memory();
