@@ -1,7 +1,7 @@
 # Create artificial noise on each image
 # The resulting images are in the chosen channel
 
-import os, random
+import os, random, sys
 import csv
 from numpy import array
 from typer import echo
@@ -88,7 +88,7 @@ def _makeDir(path: str):
 					echo(f"\rClearing... {percent}%\33[0K", nl = False)
 			else:
 				echo("Aborted!")
-				exit(0)
+				sys.exit(0)
 				
 
 def _makeNoise(img, strip_freq: float, min_shift: int, shift_direction: str):
