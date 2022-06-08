@@ -44,8 +44,8 @@ void NeuralNetwork::train_in_parallel_with_averaging(int threads) {
 		if (id) family[id - 1]->init_train(threads, id, test_freq);
 		else this->init_train(threads, id, test_freq);
 
-#		pragma omp barrier
 		for (unsigned epoch = 1; epoch <= global_epochs / epochs; epoch++) {
+#			pragma omp barrier
 			if (id) family[id - 1]->train();
 			else this->train();
 #			pragma omp barrier
