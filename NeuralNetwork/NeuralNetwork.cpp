@@ -199,7 +199,7 @@ void NeuralNetwork::monitor(const unsigned epoch) noexcept {
 
 	static const std::string terminator = get_terminator();
 
-	std::cout << "\rEpoch " << epoch + total_epochs << " | "
+	std::cout << "\rStep " << epoch + total_epochs << " | "
 		<< "Accuracy: " << accuracy << "% | "
 		<< "Best accuracy: " << best_accuracy << "%" << terminator;
 }
