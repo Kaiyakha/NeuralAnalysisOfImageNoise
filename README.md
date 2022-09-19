@@ -6,4 +6,4 @@
 3. Place config.ini into the NCLI folder.
 ## Run
 Run the app via CMD: `ncli [OPTIONS] <COMMAND> [ARGS]`.
-For further instructions, see [reference](https://github.com/Kaiyakha/NeuralAnalysisOfImageNoise-CppBased/blob/master/%D0%92%D0%9A%D0%A0.docx) (page 56).
+For further instructions, see [reference](https://github.com/Kaiyakha/NeuralAnalysisOfImageNoise-CppBased/blob/master/%D0%92%D0%9A%D0%A0.docx) (_ВКР.docx_, page 56).
